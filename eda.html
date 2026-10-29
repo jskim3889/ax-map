@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>공공 AX 지도 · 탐색적 분석</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --surface-0: #f4f3ef;
+    --surface-1: #fcfcfb;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #7a7974;
+    --line: #e2e0da;
+    --series-1: #2a78d6;
+    --series-2: #eb6834;
+    --series-3: #1baf7a;
+    --seq-0: #f0f5fc;
+    --seq-1: #cde2fb;
+    --seq-2: #9ec5f4;
+    --seq-3: #6da7ec;
+    --seq-4: #3987e5;
+    --seq-5: #256abf;
+    --seq-6: #184f95;
+    --seq-7: #0d366b;
+    --on-hi: #ffffff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      color-scheme: dark;
+      --surface-0: #121211;
+      --surface-1: #1a1a19;
+      --text-primary: #f0efec;
+      --text-secondary: #c3c2b7;
+      --text-muted: #8f8e86;
+      --line: #2e2d2a;
+      --series-1: #3987e5;
+      --series-2: #d95926;
+      --series-3: #199e70;
+      --seq-0: #1d2733;
+      --seq-1: #0d366b;
+      --seq-2: #104281;
+      --seq-3: #184f95;
+      --seq-4: #256abf;
+      --seq-5: #3987e5;
+      --seq-6: #6da7ec;
+      --seq-7: #9ec5f4;
+      --on-hi: #0b0b0b;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --surface-0: #121211; --surface-1: #1a1a19;
+    --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #8f8e86;
+    --line: #2e2d2a; --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70;
+    --seq-0: #1d2733; --seq-1: #0d366b; --seq-2: #104281; --seq-3: #184f95;
+    --seq-4: #256abf; --seq-5: #3987e5; --seq-6: #6da7ec; --seq-7: #9ec5f4;
+    --on-hi: #0b0b0b;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--surface-0); color: var(--text-primary);
+    font-family: "Noto Sans KR", system-ui, sans-serif; line-height: 1.6;
+  }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 0 16px 64px; }
+  header { padding: 40px 0 8px; }
+  .eyebrow { color: var(--text-muted); font-size: 13px; letter-spacing: .08em; margin: 0; }
+  h1 { font-size: clamp(26px, 5vw, 36px); margin: 4px 0 8px; }
+  .back { color: inherit; }
+  .question { font-size: 18px; color: var(--text-secondary); margin: 0 0 12px; }
+  .note { font-size: 13px; color: var(--text-muted); }
+  .card { background: var(--surface-1); border: 1px solid var(--line); border-radius: 10px; padding: 20px; margin-top: 16px; }
+  h2 { font-size: 18px; margin: 0 0 4px; }
+  .sub { color: var(--text-secondary); font-size: 14px; margin: 0 0 16px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 16px; }
+  .stat { background: var(--surface-1); border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+  .stat .v { font-size: clamp(22px, 3.2vw, 28px); font-weight: 700; white-space: nowrap; }
+  .stat .l { color: var(--text-secondary); font-size: 13px; }
+  svg text { fill: var(--text-secondary); font-size: 15px; font-family: inherit; }
+  .axis line, .grid line { stroke: var(--line); }
+  .bar { fill: var(--series-1); }
+  .bar:hover, .hbar:hover { opacity: .8; }
+  .hbars { display: grid; grid-template-columns: 140px 1fr 90px; gap: 6px 10px; align-items: center; font-size: 14px; }
+  .hbars .track { height: 14px; }
+  .hbars .fill { height: 14px; background: var(--series-1); border-radius: 0 4px 4px 0; min-width: 2px; }
+  .hbars .num { text-align: right; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .scroll { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  th { color: var(--text-secondary); font-weight: 500; }
+  td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .heat td.cell { text-align: center; font-variant-numeric: tabular-nums; min-width: 52px; border: 2px solid var(--surface-1); border-radius: 4px; }
+  .heat td.cell.hi { color: var(--on-hi); }
+  .heat th.col { font-size: 12px; text-align: center; vertical-align: bottom; min-width: 52px; word-break: keep-all; }
+  .heat th.row { white-space: nowrap; }
+  .legend { display: flex; gap: 4px; align-items: center; font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+  .legend span.sw { width: 22px; height: 10px; display: inline-block; border-radius: 2px; }
+  .dots { display: grid; grid-template-columns: 140px 1fr; gap: 4px 10px; align-items: center; font-size: 14px; margin-top: 8px; }
+  .dots .lane { position: relative; height: 22px; border-bottom: 1px solid var(--line); }
+  .dots .link { position: absolute; top: 10px; height: 2px; background: var(--line); }
+  .dots .dot { position: absolute; top: 4px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; box-shadow: 0 0 0 2px var(--surface-1); }
+  .dots .axis { position: relative; height: 18px; font-size: 12px; color: var(--text-muted); }
+  .dots .axis span { position: absolute; transform: translateX(-50%); }
+  .legend .dotsw { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-left: 10px; }
+  .patterns { margin: 8px 0 0; padding-left: 22px; }
+  .patterns li { margin: 6px 0; color: var(--text-secondary); }
+  .patterns b { color: var(--text-primary); }
+  .examples { font-size: 13px; color: var(--text-secondary); margin: 0; padding-left: 18px; }
+  #tip {
+    position: fixed; pointer-events: none; background: var(--text-primary); color: var(--surface-1);
+    font-size: 12px; padding: 6px 8px; border-radius: 6px; opacity: 0; transition: opacity .1s; z-index: 10;
+  }
+  footer { margin-top: 32px; font-size: 12px; color: var(--text-muted); }
+  @media (max-width: 720px) {
+    .two { grid-template-columns: 1fr; }
+    .hbars { grid-template-columns: 110px 1fr 70px; font-size: 13px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow"><a href="/" class="back">← AIZENT</a> · 공공 AX 지도 · STEP 1 탐색적 분석 · <a href="./" class="back">STEP 2 의미 지도 →</a></p>
+    <h1>공공기관들은 AX를 어떻게 하는가</h1>
+    <p class="question">나라장터 용역 발주계획 중 AI 관련 사업을 사업 유형과 기관 유형으로 나눠 본다.</p>
+    <p class="note" id="scope"></p>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <section class="card">
+    <h2>패턴 6가지: 숫자가 말해 주는 것</h2>
+    <ol class="patterns">
+      <li><b>AX 발주가 빠르게 늘고 있다.</b> 2024년 월 65~120건에서 2026년 월 196~415건으로. 2026년은 9개월 만에 2,832건으로 2024년 한 해(1,051건)의 약 2.7배다.</li>
+      <li><b>기관들의 AX는 세 갈래가 3분의 2를 차지한다.</b> 시스템·서비스 구축, 연구·정책·컨설팅, 교육·인재양성이 전체의 65.2%다.</li>
+      <li><b>돈은 시스템 구축에 몰린다.</b> 금액 기준 시스템·서비스 구축이 34.9%, 교육·인재양성이 19.0%다.</li>
+      <li><b>기관 유형마다 AX 방식이 다르다.</b> 교육기관은 교육 비중이 49%다. 연구·정책 비중은 국가기관 46%, 기타공공기관 37%, 준정부기관 34%다.</li>
+      <li><b>가장 많이 발주하는 곳은 AI 진흥 기관이다.</b> 한국지능정보사회진흥원 151건, 정보통신산업진흥원 101건. 두 곳 모두 연구·정책·컨설팅이 주된 유형이다.</li>
+      <li><b>같은 데이터에서 다음 질문이 나온다.</b> 챗봇·상담은 건수가 38건에서 56건으로 늘었는데 비중은 3.6%에서 2.0%로 줄었다. 챗봇이 생성형 AI 플랫폼 구축 안으로 흡수된 것일까?</li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>월별 AI 관련 발주계획 건수</h2>
+    <p class="sub">발주 예정 월 기준. 2024년 월 65~120건이던 것이 2026년 들어 월 196~415건으로 늘었다.</p>
+    <div class="scroll"><svg id="months" role="img" aria-label="월별 발주계획 건수 막대그래프"></svg></div>
+  </section>
+
+  <section class="card">
+    <h2>어떻게: 사업 유형별 분포</h2>
+    <p class="sub">사업명 키워드로 나눈 1차 분류다. 정밀한 유형은 다음 단계의 의미 지도(임베딩 군집)에서 다시 나눈다.</p>
+    <div class="two">
+      <div><p class="sub"><b>건수</b></p><div class="hbars" id="typeCount"></div></div>
+      <div><p class="sub"><b>발주금액 (억 원)</b></p><div class="hbars" id="typeAmount"></div></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>언제 어떻게: 연도별 사업 유형 비중</h2>
+    <p class="sub" id="yearSub"></p>
+    <div class="legend" id="yearLegend"></div>
+    <div class="dots" id="yearDots"></div>
+    <p class="note">2026년은 1~9월. 비중은 그해 전체 건수 대비 %. 점에 마우스를 올리면 건수가 나온다.</p>
+  </section>
+
+  <section class="card">
+    <h2>누가 어떻게: 기관 유형별 사업 유형 비중</h2>
+    <p class="sub">각 열(기관 유형) 안에서 사업 유형이 차지하는 비중(%). 열마다 합이 100이다. 진할수록 그 기관 유형이 그 방식을 많이 쓴다.</p>
+    <div class="scroll"><table class="heat" id="heat"></table></div>
+    <div class="legend" id="heatLegend"></div>
+  </section>
+
+  <section class="card">
+    <h2>사업 유형별 대표 사업 (금액 상위 3건)</h2>
+    <div class="scroll"><table id="examples"></table></div>
+  </section>
+
+  <section class="card">
+    <h2>발주 건수 상위 기관</h2>
+    <div class="scroll"><table id="topInst"></table></div>
+  </section>
+
+  <section class="card">
+    <h2>금액 상위 사업</h2>
+    <div class="scroll"><table id="topProj"></table></div>
+  </section>
+
+  <footer>
+    데이터: 조달청 나라장터 발주계획현황서비스(용역, data.go.kr 15129462). 공공데이터포털 Open API를 공용 프록시(k-skill-proxy)로 조회, 2026-10-29 수집.
+    사업 유형은 사업명 키워드로 나눈 1차 분류다.
+    발주계획은 사전 계획이라 실제 공고·계약과 1:1로 맞지 않는다. 금액은 발주계획 금액이며 검증 전이다.
+    담당자 개인정보는 수집 단계에서 제외했다. · KAIST ITM.690 실습 1
+  </footer>
+</div>
+<div id="tip" role="tooltip"></div>
+
+<script src="eda-data.js"></script>
+<script>
+(function () {
+  const D = window.EDA;
+  const fmt = n => n.toLocaleString("ko-KR");
+  const eok = n => Math.round(n / 1e8).toLocaleString("ko-KR");
+  const jo = n => {
+    const e = Math.round(n / 1e8), j = Math.floor(e / 10000), r = e % 10000;
+    return (j ? j + "조 " : "") + r.toLocaleString("ko-KR") + "억 원";
+  };
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const tip = document.getElementById("tip");
+  function showTip(e, html) { tip.innerHTML = html; tip.style.opacity = 1; moveTip(e); }
+  function moveTip(e) { tip.style.left = (e.clientX + 12) + "px"; tip.style.top = (e.clientY + 12) + "px"; }
+  function hideTip() { tip.style.opacity = 0; }
+  function hover(el, html) {
+    el.addEventListener("mouseenter", e => showTip(e, html));
+    el.addEventListener("mousemove", moveTip);
+    el.addEventListener("mouseleave", hideTip);
+  }
+
+  document.getElementById("scope").textContent =
+    `키워드 검색 후 AI 관련으로 판정된 ${fmt(D.raw_count)}건에서 재공고 등 같은 사업의 중복을 하나로 묶어 ${fmt(D.count)}건을 분석했다.`;
+
+  // 요약 숫자
+  const months = D.months.length;
+  document.getElementById("stats").innerHTML = [
+    [fmt(D.count) + "건", "AI 관련 용역 발주계획 (2024.01~2026.09)"],
+    [fmt(D.institutions) + "곳", "발주기관"],
+    [jo(D.amount_total), "발주계획 금액 합계"],
+  ].map(([v, l]) => `<div class="stat"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("");
+
+  // 월별 막대
+  (function () {
+    const svg = document.getElementById("months");
+    const W = 960, H = 300, P = { l: 44, r: 8, t: 12, b: 48 };
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.style.width = "100%"; svg.style.height = "auto";
+    const max = Math.max(...D.months.map(m => m[1]));
+    const step = Math.ceil(max / 4 / 50) * 50;
+    const y = v => H - P.b - (v / (step * 4)) * (H - P.t - P.b);
+    const bw = (W - P.l - P.r) / months;
+    let s = "";
+    for (let g = 0; g <= 4; g++) {
+      s += `<g class="grid"><line x1="${P.l}" x2="${W - P.r}" y1="${y(g * step)}" y2="${y(g * step)}"/></g>`;
+      s += `<text x="${P.l - 6}" y="${y(g * step) + 4}" text-anchor="end">${g * step}</text>`;
+    }
+    D.months.forEach(([m, c], i) => {
+      const x = P.l + i * bw + 2, h = H - P.b - y(c);
+      s += `<path class="bar" data-i="${i}" d="M${x},${H - P.b} v${-(h - 4)} q0,-4 4,-4 h${bw - 12} q4,0 4,4 v${h - 4} z"/>`;
+      if (m.endsWith("-01") || i === 0) s += `<text x="${x}" y="${H - P.b + 20}">${m.slice(0, 4)}</text>`;
+      if (m.endsWith("-01") || m.endsWith("-07")) s += `<text x="${x}" y="${H - P.b + 40}">${+m.slice(5)}월</text>`;
+    });
+    svg.innerHTML = s;
+    svg.querySelectorAll(".bar").forEach(b => {
+      const [m, c] = D.months[+b.dataset.i];
+      hover(b, `${m.replace("-", "년 ")}월<br><b>${fmt(c)}건</b>`);
+    });
+  })();
+
+  // 사업 유형 가로 막대
+  function hbars(id, key, label) {
+    const el = document.getElementById(id);
+    const max = Math.max(...D.types.map(t => t[key]));
+    el.innerHTML = D.types.map((t, i) =>
+      `<div>${esc(t.type)}</div><div class="track"><div class="fill hbar" data-i="${i}" style="width:${(t[key] / max) * 100}%"></div></div><div class="num">${label(t[key])}</div>`
+    ).join("");
+    el.querySelectorAll(".hbar").forEach(b => {
+      const t = D.types[+b.dataset.i];
+      hover(b, `<b>${esc(t.type)}</b><br>${fmt(t.count)}건 · ${eok(t.amount)}억 원`);
+    });
+  }
+  hbars("typeCount", "count", fmt);
+  hbars("typeAmount", "amount", eok);
+
+  // 연도별 사업 유형 비중 (점 3개 비교)
+  (function () {
+    const years = D.years, types = D.types.map(t => t.type);
+    const colors = ["--series-1", "--series-2", "--series-3"];
+    const totals = years.map(y => types.reduce((s, t) => s + D.year_type[y][t], 0));
+    const share = (yi, t) => (D.year_type[years[yi]][t] / totals[yi]) * 100;
+    const max = Math.ceil(Math.max(...types.flatMap(t => years.map((_, i) => share(i, t)))) / 5) * 5;
+    const x = p => (p / max) * 100;
+    const label = (y, i) => y + (i === years.length - 1 ? " (1~9월)" : "");
+    document.getElementById("yearSub").textContent =
+      `건수는 ${years.map((y, i) => `${label(y, i)} ${fmt(totals[i])}건`).join(" → ")}으로 늘었다. 유형 비중은 크게 바뀌지 않았지만 연구·정책·컨설팅과 시스템·서비스 구축이 조금 늘고, 교육·행사·챗봇은 줄었다.`;
+    document.getElementById("yearLegend").innerHTML =
+      years.map((y, i) => `<span class="dotsw" style="background:var(${colors[i]})"></span>${label(y, i)}`).join("");
+    let h = "";
+    types.forEach(t => {
+      const ps = years.map((_, i) => share(i, t));
+      const lo = Math.min(...ps), hi = Math.max(...ps);
+      h += `<div>${esc(t)}</div><div class="lane"><div class="link" style="left:${x(lo)}%;width:${x(hi) - x(lo)}%"></div>` +
+        ps.map((p, i) => `<div class="dot" data-t="${esc(t)}" data-i="${i}" style="left:${x(p)}%;background:var(${colors[i]})"></div>`).join("") + `</div>`;
+    });
+    const ticks = Array.from({ length: max / 5 + 1 }, (_, i) => i * 5);
+    h += `<div></div><div class="axis">${ticks.map(v => `<span style="left:${x(v)}%">${v}%</span>`).join("")}</div>`;
+    const el = document.getElementById("yearDots");
+    el.innerHTML = h;
+    el.querySelectorAll(".dot").forEach(d => {
+      const i = +d.dataset.i, t = d.dataset.t;
+      hover(d, `${esc(t)} · ${label(years[i], i)}<br><b>${share(i, t).toFixed(1)}%</b> (${fmt(D.year_type[years[i]][t])}건)`);
+    });
+  })();
+
+  // 기관 유형 × 사업 유형 히트맵 (행 비중)
+  (function () {
+    const types = D.types.map(t => t.type);
+    const steps = ["--seq-0", "--seq-1", "--seq-2", "--seq-3", "--seq-4", "--seq-5", "--seq-6", "--seq-7"];
+    const cuts = [0, 3, 6, 10, 15, 20, 30, 40];
+    const shade = p => steps[cuts.filter(c => p >= c).length - 1];
+    // 행 = 사업 유형, 열 = 기관 유형. 비중은 열(기관 유형) 안에서 계산한다
+    const kinds = D.inst_kinds;
+    const totals = Object.fromEntries(kinds.map(k => [k, types.reduce((s, t) => s + D.matrix[k][t], 0)]));
+    let h = `<tr><th></th>${kinds.map(k => `<th class="col">${esc(k)}<br><span class="note">${fmt(totals[k])}건</span></th>`).join("")}</tr>`;
+    types.forEach(t => {
+      h += `<tr><th class="row">${esc(t)}</th>` + kinds.map(k => {
+        const c = D.matrix[k][t], p = totals[k] ? (c / totals[k]) * 100 : 0;
+        const hi = cuts.filter(x => p >= x).length - 1 >= 5 ? " hi" : "";
+        return `<td class="cell${hi}" data-k="${esc(k)}" data-t="${esc(t)}" data-c="${c}" data-p="${p.toFixed(1)}" style="background:var(${shade(p)})">${p >= 1 ? Math.round(p) : ""}</td>`;
+      }).join("") + `</tr>`;
+    });
+    const el = document.getElementById("heat");
+    el.innerHTML = h;
+    el.querySelectorAll("td.cell").forEach(c => hover(c, `${c.dataset.k} · ${c.dataset.t}<br><b>${c.dataset.p}%</b> (${fmt(+c.dataset.c)}건)`));
+    document.getElementById("heatLegend").innerHTML = "비중 " + cuts.map((c, i) =>
+      `<span class="sw" style="background:var(${steps[i]})"></span>${c}%`).join(" ") + "+";
+  })();
+
+  // 표들
+  document.getElementById("examples").innerHTML =
+    `<tr><th>사업 유형</th><th>대표 사업</th></tr>` +
+    D.types.map(t => `<tr><td>${esc(t.type)}</td><td><ul class="examples">${(D.type_examples[t.type] || []).map(n => `<li>${esc(n)}</li>`).join("")}</ul></td></tr>`).join("");
+
+  document.getElementById("topInst").innerHTML =
+    `<tr><th>기관</th><th>주된 사업 유형</th><th class="n">건수</th><th class="n">금액(억)</th></tr>` +
+    D.top_institutions.map(r => `<tr><td>${esc(r.name)}</td><td>${esc(r.main_type)}</td><td class="n">${fmt(r.count)}</td><td class="n">${eok(r.amount)}</td></tr>`).join("");
+
+  document.getElementById("topProj").innerHTML =
+    `<tr><th>사업명</th><th>기관</th><th>유형</th><th class="n">연도</th><th class="n">금액(억)</th></tr>` +
+    D.top_projects.map(r => `<tr><td>${esc(r.name)}</td><td>${esc(r.inst)}</td><td>${esc(r.type)}</td><td class="n">${r.year}</td><td class="n">${eok(r.amount)}</td></tr>`).join("");
+})();
+</script>
+</body>
+</html>
