@@ -12,7 +12,7 @@
     --surface-0: #f4f3ef; --surface-1: #fcfcfb;
     --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #7a7974;
     --line: #e2e0da; --point: #c9c7c0;
-    --series-1: #2a78d6; --series-2: #eb6834;
+    --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --g-etc: #a3a199;
   }
   @media (prefers-color-scheme: dark) {
     :root:where(:not([data-theme="light"])) {
@@ -20,7 +20,7 @@
       --surface-0: #121211; --surface-1: #1a1a19;
       --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #8f8e86;
       --line: #2e2d2a; --point: #4a4945;
-      --series-1: #3987e5; --series-2: #d95926;
+      --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --g-etc: #6b6a64;
     }
   }
   :root[data-theme="dark"] {
@@ -28,7 +28,7 @@
     --surface-0: #121211; --surface-1: #1a1a19;
     --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #8f8e86;
     --line: #2e2d2a; --point: #4a4945;
-    --series-1: #3987e5; --series-2: #d95926;
+    --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --g-etc: #6b6a64;
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--surface-0); color: var(--text-primary); font-family: "Noto Sans KR", system-ui, sans-serif; line-height: 1.6; }
@@ -62,6 +62,22 @@
   .reading ol { margin: 0; padding-left: 22px; color: var(--text-secondary); }
   .reading li { margin: 6px 0; }
   .reading b { color: var(--text-primary); }
+  .answer { margin-top: 16px; }
+  .answer h2 { font-size: 20px; margin: 0 0 4px; }
+  .answer .lead { color: var(--text-secondary); margin: 0 0 14px; }
+  .stack { display: flex; height: 22px; border-radius: 6px; overflow: hidden; gap: 2px; }
+  .stack span { display: block; height: 100%; }
+  .groups { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 14px; }
+  .group .pct { font-size: 26px; font-weight: 700; line-height: 1.2; }
+  .group .gname { font-weight: 500; }
+  .group .gname i, .clist .gh i, .key i.g { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+  .group p { margin: 4px 0 0; font-size: 13px; color: var(--text-secondary); }
+  .clist .gh { font-size: 12px; color: var(--text-muted); margin: 10px 0 2px; padding-left: 8px; }
+  .key i.ring { background: none !important; border: 2px solid var(--text-primary); width: 11px; height: 11px; }
+  .profile .bar { display: grid; grid-template-columns: 110px 1fr 44px; gap: 6px; align-items: center; font-size: 13px; margin: 4px 0; }
+  .profile .bar .t { height: 10px; border-radius: 0 3px 3px 0; min-width: 2px; }
+  .profile .bar .v { text-align: right; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+  @media (max-width: 860px) { .groups { grid-template-columns: 1fr 1fr; } }
   .guide { margin-top: 16px; }
   .guide-head { display: flex; justify-content: space-between; align-items: center; }
   .guide h2 { margin: 0; }
@@ -98,15 +114,22 @@
     <p class="note" id="scope"></p>
   </header>
 
+  <section class="answer card" aria-label="이 지도가 말하는 것">
+    <h2>이 지도가 말하는 것</h2>
+    <p class="lead" id="answerLead"></p>
+    <div class="stack" id="stack" role="img" aria-label="네 갈래의 비중 막대"></div>
+    <div class="groups" id="groups"></div>
+  </section>
+
   <section class="guide card" id="guide" aria-label="사용 방법">
     <div class="guide-head">
       <h2>이렇게 사용합니다</h2>
       <button type="button" class="link" id="guideClose" aria-label="사용 방법 접기">접기</button>
     </div>
     <ol class="steps">
-      <li><span class="step">1</span><div><b>사업 유형 고르기</b><br>오른쪽 목록이나 지도 위 번호를 누르면 그 유형의 사업이 <span class="sw s1"></span>파란 점으로 표시되고, 오른쪽에 설명이 나옵니다.</div></li>
-      <li><span class="step">2</span><div><b>우리 기관 찾기</b><br>검색창에 기관명을 넣으면 그 기관의 발주가 <span class="sw s2"></span>주황 점으로 표시됩니다. 어떤 유형에 몰려 있는지 볼 수 있습니다.</div></li>
-      <li><span class="step">3</span><div><b>사업 하나씩 보기</b><br>점에 마우스를 올리면(휴대폰은 탭) 사업명, 기관, 연도, 금액이 나옵니다.</div></li>
+      <li><span class="step">1</span><div><b>색으로 큰 갈래 보기</b><br>점의 색은 위의 네 갈래입니다. 같은 색이 모인 곳이 그 방식의 AX 사업이 모인 곳입니다.</div></li>
+      <li><span class="step">2</span><div><b>우리 기관 찾기</b><br>검색창에 기관명을 넣으면 그 기관의 발주가 테두리 원으로 표시되고, 오른쪽에 그 기관의 AX가 어느 갈래에 몰려 있는지 나옵니다.</div></li>
+      <li><span class="step">3</span><div><b>세부 유형과 사업 보기</b><br>오른쪽 목록이나 지도 위 번호를 누르면 그 세부 유형만 진하게 보입니다. 점에 마우스를 올리면(휴대폰은 탭) 사업명, 기관, 금액이 나옵니다.</div></li>
     </ol>
     <div class="try">
       <span class="note">예시로 해 보기</span>
@@ -165,19 +188,49 @@
   const eok = n => (n / 1e8).toLocaleString("ko-KR", { maximumFractionDigits: 1 });
   const esc = s => String(s).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
   const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-  const order = C.map(c => c.id); // 건수 순
+  const G = M.groups;
+  const GCOLOR = { build: "--series-1", edu: "--series-2", policy: "--series-3", etc: "--g-etc" };
+  const groupOf = Object.fromEntries(C.map(c => [c.id, c.group]));
+  const gById = Object.fromEntries(G.map(g => [g.key, g]));
+  // 번호는 갈래 순서대로 매긴다 (목록과 지도 번호가 같게)
+  const order = G.flatMap(g => C.filter(c => c.group === g.key).map(c => c.id));
   const no = Object.fromEntries(order.map((id, i) => [id, i + 1]));
+  const pct = (n, d) => Math.round((n / d) * 100);
 
   document.getElementById("scope").textContent =
-    `AI 관련 용역 발주계획 ${fmt(P.length)}건을 사업명의 의미로 배치하고 10개 유형으로 묶었습니다.`;
+    `AI 관련 용역 발주계획 ${fmt(P.length)}건을 사업명의 의미로 배치하고 네 갈래, 10개 세부 유형으로 묶었습니다.`;
+
+  // 맨 위 요약: 네 갈래의 비중
+  (function () {
+    const total = P.length, amt = G.reduce((s, g) => s + g.amount, 0);
+    const yr = (g, y) => (g.years.find(x => x[0] === y) || [y, 0])[1];
+    const yt = Object.fromEntries(M.year_totals);
+    const share = (g, y) => pct(yr(g, y), yt[y]);
+    const b = gById.build, e = gById.edu, p = gById.policy;
+    document.getElementById("answerLead").textContent =
+      `공공기관의 AX 발주는 시스템을 만들고 운영하는 일이 ${pct(b.count, total)}%로 가장 많고, 금액으로는 ${pct(b.amount, amt)}%를 차지합니다. 다음은 교육(${pct(e.count, total)}%), 정책·전략(${pct(p.count, total)}%) 순입니다.`;
+    document.getElementById("stack").innerHTML = G.map(g =>
+      `<span style="width:${(g.count / total) * 100}%;background:var(${GCOLOR[g.key]})" title="${esc(g.label)} ${pct(g.count, total)}%"></span>`).join("");
+    const notes = {
+      build: `금액의 ${pct(b.amount, amt)}%. 콜봇·업무 AI 서비스, 관제·분석 시스템, AI 인프라·플랫폼 구축`,
+      edu: `교원 연수, 교육 플랫폼·콘텐츠, AI·SW 교육 프로그램`,
+      policy: `정책·제도 연구와 AX 전략·컨설팅. 비중이 2024년 ${share(p, "2024")}% → 2026년 ${share(p, "2026")}%로 늘었습니다`,
+      etc: `컨퍼런스·행사, 이름에만 AI가 들어간 시설관리 등`,
+    };
+    document.getElementById("groups").innerHTML = G.map(g => `
+      <div class="group">
+        <div class="pct">${pct(g.count, total)}%</div>
+        <div class="gname"><i style="background:var(${GCOLOR[g.key]})"></i>${esc(g.label)}</div>
+        <p>${fmt(g.count)}건. ${notes[g.key]}</p>
+      </div>`).join("");
+  })();
 
   let selected = null, query = "";
 
   // 범례
   function drawKey() {
-    const items = [`<span><i style="background:var(--point)"></i>전체 사업</span>`];
-    if (selected !== null) items.push(`<span><i style="background:var(--series-1)"></i>${esc(byId[selected].name)}</span>`);
-    if (query) items.push(`<span><i style="background:var(--series-2)"></i>${esc(query)} 발주</span>`);
+    const items = G.map(g => `<span><i class="g" style="background:var(${GCOLOR[g.key]})"></i>${esc(g.label)}</span>`);
+    if (query) items.push(`<span><i class="ring"></i>검색한 기관</span>`);
     document.getElementById("key").innerHTML = items.join("");
   }
 
@@ -207,19 +260,27 @@
   function matchQ(i) { return query && P[i][4].includes(query); }
   function draw() {
     ctx.clearRect(0, 0, W, H);
-    const base = css("--point"), s1 = css("--series-1"), s2 = css("--series-2");
-    ctx.fillStyle = base;
-    P.forEach((p, i) => { ctx.fillRect(screen[i][0] - 1.5, screen[i][1] - 1.5, 3, 3); });
-    if (selected !== null) P.forEach((p, i) => { if (p[2] === selected) dot(i, 2.6, s1); });
-    if (query) P.forEach((p, i) => { if (matchQ(i)) dot(i, 4, s2); });
+    const col = Object.fromEntries(Object.entries(GCOLOR).map(([k, v]) => [k, css(v)]));
+    const ink = css("--text-primary");
+    // 모든 점을 갈래 색으로. 세부 유형을 골랐거나 기관을 검색하면 나머지는 흐리게
+    ctx.globalAlpha = (selected !== null || query) ? 0.18 : 0.85;
+    P.forEach((p, i) => { ctx.fillStyle = col[groupOf[p[2]]]; ctx.fillRect(screen[i][0] - 1.5, screen[i][1] - 1.5, 3, 3); });
+    ctx.globalAlpha = 1;
+    if (selected !== null) P.forEach((p, i) => { if (p[2] === selected) dot(i, 2.6, col[groupOf[p[2]]]); });
+    if (query) P.forEach((p, i) => {
+      if (!matchQ(i)) return;
+      const [x, y] = screen[i];
+      ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fillStyle = col[groupOf[p[2]]]; ctx.fill();
+      ctx.beginPath(); ctx.arc(x, y, 5.5, 0, Math.PI * 2); ctx.lineWidth = 2; ctx.strokeStyle = ink; ctx.stroke();
+    });
     // 군집 번호 표지 (직접 라벨, 누를 수 있음)
     ctx.font = "600 12px Noto Sans KR, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
     badges().forEach(([id, x, y]) => {
-      const on = id === selected;
+      const on = id === selected, gc = col[groupOf[id]];
       ctx.beginPath(); ctx.arc(x, y, 12, 0, Math.PI * 2);
-      ctx.fillStyle = on ? s1 : css("--surface-1"); ctx.fill();
-      ctx.lineWidth = 1.5; ctx.strokeStyle = on ? s1 : css("--text-muted"); ctx.stroke();
-      ctx.fillStyle = on ? "#fff" : css("--text-primary"); ctx.fillText(no[id], x, y + 0.5);
+      ctx.fillStyle = on ? ink : css("--surface-1"); ctx.fill();
+      ctx.lineWidth = 2.5; ctx.strokeStyle = gc; ctx.stroke();
+      ctx.fillStyle = on ? css("--surface-1") : ink; ctx.fillText(no[id], x, y + 0.5);
     });
     drawKey();
     drawStatus();
@@ -233,13 +294,13 @@
   // 지도 아래 상태 문장: 지금 무엇이 표시되는지
   function drawStatus() {
     const parts = [];
-    if (selected !== null) parts.push(`파란 점: ${no[selected]}. ${esc(byId[selected].name)} ${fmt(byId[selected].count)}건`);
+    if (selected !== null) parts.push(`진한 점: ${no[selected]}. ${esc(byId[selected].name)} ${fmt(byId[selected].count)}건`);
     if (query) {
       const n = P.filter((p, i) => matchQ(i)).length;
       const insts = new Set(P.filter((p, i) => matchQ(i)).map(p => p[4])).size;
-      parts.push(n ? `주황 점: 기관명 검색 "${esc(query)}" → 기관 ${fmt(insts)}곳, 발주 ${fmt(n)}건` : `기관명 검색 "${esc(query)}" 결과가 없습니다. 기관명 일부만 넣어 보세요.`);
+      parts.push(n ? `테두리 원: 기관명 검색 "${esc(query)}" → 기관 ${fmt(insts)}곳, 발주 ${fmt(n)}건` : `기관명 검색 "${esc(query)}" 결과가 없습니다. 기관명 일부만 넣어 보세요.`);
     }
-    document.getElementById("status").innerHTML = parts.length ? parts.join(" · ") : `전체 ${fmt(P.length)}건을 보고 있습니다. 유형을 고르거나 기관을 검색해 보세요.`;
+    document.getElementById("status").innerHTML = parts.length ? parts.join(" · ") : `전체 ${fmt(P.length)}건을 네 갈래 색으로 보고 있습니다. 세부 유형을 고르거나 기관을 검색해 보세요.`;
   }
 
   // 사용법 힌트: 처음 한 번 조작하면 사라진다
@@ -286,17 +347,20 @@
 
   // 군집 목록과 상세
   const clist = document.getElementById("clist");
-  clist.innerHTML = C.map(c =>
-    `<li><button type="button" data-id="${c.id}" aria-pressed="false"><span class="no">${no[c.id]}</span><span>${esc(c.name)}</span><span class="n">${fmt(c.count)}</span></button></li>`).join("");
+  clist.innerHTML = G.map(g =>
+    `<li class="gh"><i style="background:var(${GCOLOR[g.key]})"></i>${esc(g.label)}</li>` +
+    order.filter(id => groupOf[id] === g.key).map(id => byId[id]).map(c =>
+      `<li><button type="button" data-id="${c.id}" aria-pressed="false"><span class="no">${no[c.id]}</span><span>${esc(c.name)}</span><span class="n">${fmt(c.count)}</span></button></li>`).join("")
+  ).join("");
   clist.querySelectorAll("button").forEach(b => b.addEventListener("click", () => { used(); select(+b.dataset.id); }));
 
   const EMPTY = `
     <div class="empty">
-      위 목록에서 유형을 누르면 여기에 그 유형의 건수, 연도별 변화, 많이 발주한 기관, 대표 사업이 나옵니다.
+      기관명을 검색하면 여기에 그 기관의 AX가 어느 갈래에 몰려 있는지 나옵니다. 위 목록에서 세부 유형을 누르면 그 유형의 건수, 연도별 변화, 많이 발주한 기관, 대표 사업이 나옵니다.
       <div class="try">
+        <button type="button" class="chip" data-query="국민건강보험공단">국민건강보험공단</button>
+        <button type="button" class="chip" data-query="교육청">교육청 전체</button>
         <button type="button" class="chip" data-cluster="8">AX 전략·컨설팅</button>
-        <button type="button" class="chip" data-cluster="1">AI 서비스·콜봇</button>
-        <button type="button" class="chip" data-cluster="6">AI 정책·제도 연구</button>
       </div>
     </div>`;
 
@@ -304,24 +368,45 @@
   function select(id, keep) {
     selected = (selected === id && !keep) ? null : id;
     clist.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.id === selected)));
+    renderDetail();
+    draw();
+  }
+
+  // 검색한 기관의 AX 프로필: 어느 갈래에 몰려 있나
+  function profileHtml() {
+    const hits = P.filter((p, i) => matchQ(i));
+    if (!hits.length) return "";
+    const insts = new Set(hits.map(p => p[4]));
+    const byG = G.map(g => [g, hits.filter(p => groupOf[p[2]] === g.key).length]);
+    const top = [...hits].sort((a, b) => b[5] - a[5]).slice(0, 6);
+    const label = insts.size === 1 ? esc([...insts][0]) : `"${esc(query)}" 포함 기관 ${fmt(insts.size)}곳`;
+    return `<div class="profile">
+      <h3>${label}의 AX</h3>
+      <div class="big">${fmt(hits.length)}건 · ${eok(hits.reduce((s, p) => s + p[5], 0))}억 원</div>
+      ${byG.map(([g, n]) => `<div class="bar"><span>${esc(g.label)}</span><span class="t" style="width:${(n / hits.length) * 100}%;background:var(${GCOLOR[g.key]})"></span><span class="v">${pct(n, hits.length)}%</span></div>`).join("")}
+      <h3>금액이 큰 사업</h3><ul>${top.map(p => `<li>${esc(p[3])} <span class="note">(${p[6]}, ${eok(p[5])}억)</span></li>`).join("")}</ul>
+    </div>`;
+  }
+
+  function renderDetail() {
     const d = document.getElementById("detail");
-    if (selected === null) { d.innerHTML = EMPTY; draw(); return; }
-    const c = byId[selected], total = c.kinds.reduce((s, k) => s + k[1], 0);
-    d.innerHTML = `
+    const prof = query ? profileHtml() : "";
+    if (selected === null) { d.innerHTML = prof || EMPTY; return; }
+    const c = byId[selected];
+    d.innerHTML = prof + `
       <h3>${no[c.id]}. ${esc(c.name)}</h3>
       <div class="big">${fmt(c.count)}건 · ${eok(c.amount)}억 원</div>
       <h3>연도별 건수</h3><ul>${c.years.map(([y, n]) => `<li>${y}년 ${fmt(n)}건</li>`).join("")}</ul>
       <h3>많이 발주한 기관</h3><ul>${c.top_insts.map(([n, k]) => `<li>${esc(n)} (${k}건)</li>`).join("")}</ul>
       <h3>기관 유형</h3><ul>${c.kinds.map(([n, k]) => `<li>${esc(n)} ${Math.round(k / c.count * 100)}%</li>`).join("")}</ul>
       <h3>금액 상위 사업</h3><ul>${c.examples.map(n => `<li>${esc(n)}</li>`).join("")}</ul>`;
-    draw();
   }
 
   // 기관 검색
   const insts = [...new Set(P.map(p => p[4]))].sort();
   document.getElementById("insts").innerHTML = insts.map(n => `<option value="${esc(n)}">`).join("");
   const qInput = document.getElementById("q");
-  function setQuery(v) { query = v.trim(); qInput.value = v; used(); draw(); }
+  function setQuery(v) { query = v.trim(); qInput.value = v; used(); renderDetail(); draw(); }
   qInput.addEventListener("input", e => setQuery(e.target.value));
   document.getElementById("reset").addEventListener("click", () => {
     query = ""; qInput.value = ""; selected = null; select(null, true);
