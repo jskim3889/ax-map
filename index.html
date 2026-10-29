@@ -98,7 +98,8 @@
   details.card summary { cursor: pointer; font-weight: 700; }
   details.card[open] summary { margin-bottom: 10px; }
   .key { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
-  .canvas-box { position: relative; width: 100%; aspect-ratio: 4 / 3; }
+  .canvas-box { position: relative; width: 100%; aspect-ratio: 16 / 9; }
+  @media (max-width: 860px) { .canvas-box { aspect-ratio: 4 / 3; } }
   canvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
 
   .reading ol { margin: 0; padding-left: 22px; color: var(--text-secondary); }
@@ -159,12 +160,13 @@
     <aside class="card detail" id="detail" aria-live="polite"></aside>
   </div>
 
-  <details class="card" id="scatterBox">
-    <summary>점으로 보기: 사업 5,593건의 의미 지도</summary>
-    <p class="note">점 하나가 사업 한 건이고, 사업명이 비슷할수록 가까이 놓입니다. 좌표축 자체에는 의미가 없고, 사업명이 짧아 유형끼리 많이 섞여 있습니다(실루엣 0.016). 위 지형도에서 고른 유형과 검색한 기관이 여기에도 표시됩니다.</p>
+  <section class="card" aria-label="시점과 금액 지도">
+    <h2>언제, 얼마짜리를: 시점 × 금액 지도</h2>
+    <p class="note">점 하나가 사업 한 건입니다. 가로는 발주 예정 월, 세로는 발주계획 금액(눈금 한 칸마다 10배), 색은 네 갈래입니다. 위 지형도에서 고른 유형과 검색한 기관이 여기에도 표시됩니다.</p>
     <div class="key" id="key"></div>
-    <div class="canvas-box"><canvas id="map" role="img" aria-label="AI 관련 발주계획 의미 지도 산점도"></canvas></div>
-  </details>
+    <div class="canvas-box"><canvas id="map" role="img" aria-label="발주 시점과 금액에 따른 AI 관련 발주계획 산점도"></canvas></div>
+    <p class="note" id="mapNote"></p>
+  </section>
 
   <section class="card reading">
     <h2>지도 읽기</h2>
@@ -181,7 +183,7 @@
 <div id="tip" role="tooltip"></div>
 
 <!-- 데이터를 바꾸면 v 값도 바꾼다 (GitHub Pages가 10분간 캐시해서 예전 데이터가 섞이는 것을 막음) -->
-<script src="map-data.js?v=20261029-tree"></script>
+<script src="map-data.js?v=20261030-month"></script>
 <script>
 (function () {
   const M = window.MAP;
@@ -324,31 +326,64 @@
     if (matchMedia("(max-width: 860px)").matches) tree.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 
-  // 점으로 보기 (접힌 상세 보기)
-  const box = document.getElementById("scatterBox");
+  // 시점 × 금액 지도: 가로 = 발주 예정 월, 세로 = 금액(로그). 좌표가 실제 값이다
   const canvas = document.getElementById("map"), ctx = canvas.getContext("2d");
-  const xs = P.map(p => p[0]), ys = P.map(p => p[1]);
-  const xmin = Math.min(...xs), xmax = Math.max(...xs), ymin = Math.min(...ys), ymax = Math.max(...ys);
-  const pad = 14;
+  const monthIdx = p => (+p[6] - 2024) * 12 + (p[8] - 1);           // 2024-01 = 0
+  const MONTHS = Math.max(...P.map(monthIdx)) + 1;
+  const YMIN = 6, YMAX = 11;                                           // 10^6(100만) ~ 10^11(1,000억) 원
+  const FLOOR = 5.6;                                                   // 100만 원 미만·미기재 줄
+  const jitter = i => ((Math.sin(i * 12.9898) * 43758.5453) % 1 + 1) % 1; // 같은 달 안에서 점이 겹치지 않게 고정된 흩뿌림
+  const MG = { l: 84, r: 10, t: 10, b: 40 };
   let W = 0, H = 0, screen = [];
+  const lowCount = P.filter(p => p[5] < 1e6).length;
+  document.getElementById("mapNote").textContent =
+    `금액이 100만 원 미만이거나 비어 있는 ${fmt(lowCount)}건은 맨 아래 줄에 모았습니다. 2026년은 9월까지입니다.`;
+  function yOf(v) { return v < 1e6 ? FLOOR : Math.min(Math.log10(v), YMAX); }
   function sizeMap() {
     const r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
     W = r.width; H = r.height; canvas.width = W * dpr; canvas.height = H * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    screen = P.map(p => [pad + ((p[0] - xmin) / (xmax - xmin)) * (W - 2 * pad), H - pad - ((p[1] - ymin) / (ymax - ymin)) * (H - 2 * pad)]);
+    const pw = W - MG.l - MG.r, ph = H - MG.t - MG.b;
+    screen = P.map((p, i) => [
+      MG.l + ((monthIdx(p) + 0.1 + jitter(i) * 0.8) / MONTHS) * pw,
+      MG.t + (1 - (yOf(p[5]) - FLOOR) / (YMAX - FLOOR)) * ph,
+    ]);
+  }
+  function drawAxes() {
+    const pw = W - MG.l - MG.r, ph = H - MG.t - MG.b, line = css("--line"), muted = css("--text-muted");
+    const yPx = v => MG.t + (1 - (v - FLOOR) / (YMAX - FLOOR)) * ph;
+    ctx.font = "12px Noto Sans KR, sans-serif"; ctx.fillStyle = muted; ctx.strokeStyle = line; ctx.lineWidth = 1;
+    const ylab = { 6: "100만", 7: "1,000만", 8: "1억", 9: "10억", 10: "100억", 11: "1,000억" };
+    ctx.textAlign = "right"; ctx.textBaseline = "middle";
+    for (let e = YMIN; e <= YMAX; e++) {
+      ctx.beginPath(); ctx.moveTo(MG.l, yPx(e)); ctx.lineTo(W - MG.r, yPx(e)); ctx.stroke();
+      ctx.fillText(ylab[e], MG.l - 6, yPx(e));
+    }
+    ctx.fillText("미만·미기재", MG.l - 6, yPx(FLOOR));
+    ctx.textAlign = "left"; ctx.textBaseline = "top";
+    for (let m = 0; m < MONTHS; m++) {
+      const x = MG.l + (m / MONTHS) * pw;
+      if (m % 12 === 0) {
+        ctx.beginPath(); ctx.moveTo(x, MG.t); ctx.lineTo(x, H - MG.b); ctx.stroke();
+        ctx.fillText(`${2024 + m / 12}년`, x + 4, H - MG.b + 6);
+      } else if (m % 12 === 6) {
+        ctx.fillText("7월", x + 2, H - MG.b + 22);
+      }
+    }
   }
   function drawMap() {
     document.getElementById("key").innerHTML = G.map(g => `<span><span class="gsw" style="background:var(${GCOLOR[g.key]})"></span>${esc(g.label)}</span>`).join("") +
       (query ? `<span>○ 검색한 기관</span>` : "");
-    if (!box.open || !W) return;
+    if (!W) return;
     ctx.clearRect(0, 0, W, H);
+    drawAxes();
     const col = Object.fromEntries(Object.entries(GCOLOR).map(([k, v]) => [k, css(v)])), ink = css("--text-primary");
     const focus = selected !== null || query;
     P.forEach((p, i) => {
       const on = selected !== null && p[2] === selected;
-      ctx.globalAlpha = focus && !on ? 0.15 : 0.9;
+      ctx.globalAlpha = focus && !on ? 0.12 : 0.75;
       ctx.fillStyle = col[groupOf[p[2]]];
-      const r = on ? 2.5 : 1.5;
+      const r = on ? 2.5 : 1.6;
       ctx.fillRect(screen[i][0] - r, screen[i][1] - r, r * 2, r * 2);
     });
     ctx.globalAlpha = 1;
@@ -358,8 +393,8 @@
       ctx.lineWidth = 2; ctx.strokeStyle = ink; ctx.stroke();
     });
   }
-  box.addEventListener("toggle", () => { if (box.open) { sizeMap(); drawMap(); } });
-  window.addEventListener("resize", () => { if (box.open) { sizeMap(); drawMap(); } });
+  window.addEventListener("resize", () => { sizeMap(); drawMap(); });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawMap);
   const tip = document.getElementById("tip");
   function nearest(e, max) {
     const r = canvas.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
@@ -369,7 +404,7 @@
   }
   function showTip(i, e) {
     const p = P[i];
-    tip.innerHTML = `<b>${esc(p[3])}</b><br>${esc(p[4])} · ${p[6]}년 · ${eok(p[5])}억 원<br>${esc(byId[p[2]].name)}`;
+    tip.innerHTML = `<b>${esc(p[3])}</b><br>${esc(p[4])} · ${p[6]}년 ${p[8]}월 · ${eok(p[5])}억 원<br>${esc(byId[p[2]].name)}`;
     tip.style.left = Math.max(8, Math.min(e.clientX + 12, window.innerWidth - 330)) + "px";
     tip.style.top = (e.clientY + 12) + "px"; tip.style.opacity = 1;
   }
@@ -390,11 +425,15 @@
     if (ax) items.push(`<b>전략을 먼저 세우려는 움직임이 늘고 있습니다.</b> AX 전략·컨설팅은 2024년 ${yr(ax, "2024")}건에서 2026년(9월까지) ${yr(ax, "2026")}건으로 늘었고, 정책·전략 갈래 비중도 ${pct(yr(p, "2024"), yt["2024"])}%에서 ${pct(yr(p, "2026"), yt["2026"])}%로 커졌습니다.`);
     const edu = gById.edu;
     items.push(`<b>교육은 세 사업 중 하나꼴입니다.</b> ${fmt(edu.count)}건(${pct(edu.count, total)}%)으로, 교원 연수, 교육 플랫폼·콘텐츠, AI·SW 교육 프로그램으로 나뉩니다.`);
+    // 시점 × 금액 지도에서 읽히는 것
+    const mid = P.filter(p => p[5] >= 1e7 && p[5] < 1e9).length, big = P.filter(p => p[5] >= 1e10).length;
+    items.push(`<b>2026년에 점이 빽빽해집니다.</b> 2024년 ${fmt(yt["2024"])}건이던 발주계획이 2026년에는 9월까지만 ${fmt(yt["2026"])}건입니다. 금액은 대부분 1천만~10억 원 사이(${pct(mid, total)}%)이고, 100억 원이 넘는 사업은 ${fmt(big)}건입니다.`);
     const noise = C.find(c => c.name.startsWith("이름만"));
     if (noise) items.push(`<b>수집의 한계도 보입니다.</b> ${fmt(noise.count)}건은 "인공지능과학관 청소·시설관리"처럼 이름에만 AI가 들어간 사업입니다. 키워드 수집으로는 걸러지지 않았습니다.`);
     document.getElementById("reading").innerHTML = items.map(t => `<li>${t}</li>`).join("");
   })();
 
+  sizeMap();
   refresh();
 })();
 </script>
