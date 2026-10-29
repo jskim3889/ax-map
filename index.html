@@ -73,7 +73,7 @@
   <header>
     <p class="eyebrow"><a href="/">← AIZENT</a> · 공공 AX 지도 · <a href="eda.html">STEP 1 탐색적 분석</a> · STEP 2 의미 지도</p>
     <h1>공공기관들은 AX를 어떻게 하는가</h1>
-    <p class="question">점 하나가 AI 관련 발주계획 한 건이다. 사업명이 비슷할수록 가까이 놓인다.</p>
+    <p class="question">점 하나가 AI 관련 발주계획 한 건입니다. 사업명이 비슷할수록 가까이 놓입니다.</p>
     <p class="note" id="scope"></p>
   </header>
 
@@ -86,7 +86,7 @@
       </div>
       <div class="key" id="key"></div>
       <div class="canvas-box"><canvas id="map" role="img" aria-label="AI 관련 발주계획 의미 지도 산점도"></canvas></div>
-      <p class="note">좌표축 자체에는 의미가 없다. 가까운 점끼리는 비슷한 사업이지만, 멀리 떨어진 덩어리 사이의 거리는 정확하지 않다.</p>
+      <p class="note">좌표축 자체에는 의미가 없습니다. 가까운 점끼리는 비슷한 사업이지만, 멀리 떨어진 덩어리 사이의 거리는 정확하지 않습니다.</p>
     </section>
 
     <aside class="card">
@@ -99,13 +99,13 @@
   <section class="card reading">
     <h2>지도 읽기</h2>
     <ol id="reading"></ol>
-    <p class="note">지도는 가설이다. 군집 경계는 흐릿하고(실루엣 0.016), 라벨은 칸막이가 아니라 경향이다. 확인은 원문 공고로 한다.</p>
+    <p class="note">지도는 가설입니다. 군집 경계는 흐릿하고(실루엣 0.016), 라벨은 칸막이가 아니라 경향입니다. 확인은 원문 공고로 합니다.</p>
   </section>
 
   <footer>
     방법: 사업명에서 연도·(긴급) 같은 꼬리표를 떼고 qwen/qwen3-embedding-8b로 임베딩(4,096차원) → K-means 10개 군집(원본 차원에서) → UMAP으로 2차원 표시. 시드 42.
     데이터: 조달청 나라장터 발주계획현황서비스(용역, data.go.kr 15129462), 2024.01~2026.09, 중복 정리 후 5,593건. 공용 프록시(k-skill-proxy)로 조회, 2026-10-29 수집.
-    군집 이름은 군집 중심에 가까운 사업명을 읽고 붙였다. · <a href="eda.html">탐색적 분석 보기</a> · KAIST ITM.690 실습 1
+    군집 이름은 군집 중심에 가까운 사업명을 읽고 붙였습니다. · <a href="eda.html">탐색적 분석 보기</a> · KAIST ITM.690 실습 1
   </footer>
 </div>
 <div id="tip" role="tooltip"></div>
@@ -125,7 +125,7 @@
   const no = Object.fromEntries(order.map((id, i) => [id, i + 1]));
 
   document.getElementById("scope").textContent =
-    `AI 관련 용역 발주계획 ${fmt(P.length)}건을 사업명의 의미로 배치하고 10개 유형으로 묶었다.`;
+    `AI 관련 용역 발주계획 ${fmt(P.length)}건을 사업명의 의미로 배치하고 10개 유형으로 묶었습니다.`;
 
   let selected = null, query = "";
 
@@ -240,13 +240,13 @@
     const yr = (c, y) => (c.years.find(x => x[0] === y) || [y, 0])[1];
     const items = [];
     const edu = C.filter(c => /교육|연수|교원/.test(c.name));
-    items.push(`<b>교육이 가장 큰 갈래다.</b> 교육 관련 군집 ${edu.length}개(${edu.map(c => no[c.id]).join("·")}번)가 합쳐 ${fmt(edu.reduce((s, c) => s + c.count, 0))}건이다.`);
+    items.push(`<b>교육이 가장 큰 갈래입니다.</b> 교육 관련 군집 ${edu.length}개(${edu.map(c => no[c.id]).join("·")}번)가 합쳐 ${fmt(edu.reduce((s, c) => s + c.count, 0))}건입니다.`);
     const ax = C.find(c => c.name.startsWith("AX"));
-    if (ax) items.push(`<b>"AX"라는 말을 쓰는 사업은 따로 모인다.</b> ${no[ax.id]}번 AX 전략·컨설팅은 ${fmt(ax.count)}건이고 2024년 ${yr(ax, "2024")}건 → 2026년(9월까지) ${yr(ax, "2026")}건으로 늘었다.`);
+    if (ax) items.push(`<b>"AX"라는 말을 쓰는 사업은 따로 모입니다.</b> ${no[ax.id]}번 AX 전략·컨설팅은 ${fmt(ax.count)}건이고 2024년 ${yr(ax, "2024")}건 → 2026년(9월까지) ${yr(ax, "2026")}건으로 늘었습니다.`);
     const pol = C.find(c => c.name.includes("정책"));
-    if (pol) items.push(`<b>정책·제도 연구는 중앙 기관 몫이다.</b> ${no[pol.id]}번 군집의 기관 유형 상위는 ${pol.kinds.slice(0, 2).map(k => `${esc(k[0])} ${Math.round(k[1] / pol.count * 100)}%`).join(", ")}다.`);
+    if (pol) items.push(`<b>정책·제도 연구는 국가기관과 공공기관이 주로 발주합니다.</b> ${no[pol.id]}번 군집의 기관 유형은 ${pol.kinds.slice(0, 2).map(k => `${esc(k[0])} ${Math.round(k[1] / pol.count * 100)}%`).join(", ")} 순입니다.`);
     const noise = C.find(c => c.name.startsWith("이름만"));
-    if (noise) items.push(`<b>지도는 수집의 한계도 보여 준다.</b> ${no[noise.id]}번 ${fmt(noise.count)}건은 "인공지능과학관 청소·시설관리"처럼 이름에만 AI가 들어간 사업이다. 키워드 수집으로는 걸러지지 않았다.`);
+    if (noise) items.push(`<b>지도는 수집의 한계도 보여 줍니다.</b> ${no[noise.id]}번 ${fmt(noise.count)}건은 "인공지능과학관 청소·시설관리"처럼 이름에만 AI가 들어간 사업입니다. 키워드 수집으로는 걸러지지 않았습니다.`);
     document.getElementById("reading").innerHTML = items.map(t => `<li>${t}</li>`).join("");
   })();
 
