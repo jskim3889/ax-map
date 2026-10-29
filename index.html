@@ -15,22 +15,6 @@
     --line: #e2e0da;
     --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --g-etc: #a3a199;
   }
-  @media (prefers-color-scheme: dark) {
-    :root:where(:not([data-theme="light"])) {
-      color-scheme: dark;
-      --surface-0: #121211; --surface-1: #1a1a19;
-      --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #8f8e86;
-      --line: #2e2d2a;
-      --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --g-etc: #6b6a64;
-    }
-  }
-  :root[data-theme="dark"] {
-    color-scheme: dark;
-    --surface-0: #121211; --surface-1: #1a1a19;
-    --text-primary: #f0efec; --text-secondary: #c3c2b7; --text-muted: #8f8e86;
-    --line: #2e2d2a;
-    --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --g-etc: #6b6a64;
-  }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--surface-0); color: var(--text-primary); font-family: "Noto Sans KR", system-ui, sans-serif; line-height: 1.6; }
   .wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px 56px; }
@@ -105,6 +89,59 @@
   .reading ol { margin: 0; padding-left: 22px; color: var(--text-secondary); }
   .reading li { margin: 6px 0; }
   .reading b { color: var(--text-primary); }
+  /* 떠오르는 말 · 구축 세부 · 지역 */
+  :root { --up: #2a78d6; --down: #eb6834; --old: #b7b5ad;
+    --seq-0: #f0f5fc; --seq-1: #cde2fb; --seq-2: #9ec5f4; --seq-3: #6da7ec; --seq-4: #3987e5; --seq-5: #256abf; --seq-6: #184f95; --seq-7: #0d366b; }
+  .card h3.sub { font-size: 15px; margin: 18px 0 8px; }
+  .q { color: var(--text-secondary); margin: 0 0 4px; }
+  .how { font-size: 12px; color: var(--text-muted); margin: 0 0 10px; }
+  .find { font-size: 15px; background: var(--surface-0); border-radius: 6px; padding: 10px 12px; margin: 14px 0 0; }
+  .prows, .srows { display: grid; gap: 6px; }
+  .prow { display: grid; grid-template-columns: 170px 1fr 130px; gap: 10px; align-items: center; font-size: 14px; }
+  .prow .nm { font-weight: 700; }
+  .prow .bar { position: relative; height: 12px; background: var(--surface-0); border-radius: 3px; }
+  .prow .bar span { position: absolute; left: 0; top: 0; height: 12px; border-radius: 3px; background: var(--up); }
+  .prow .v { font-size: 13px; color: var(--text-secondary); text-align: right; white-space: nowrap; }
+  .prow .ex { grid-column: 2 / 4; font-size: 12px; color: var(--text-muted); margin-top: -4px; }
+  .words { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .wcard { border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+  .wcard .w { font-size: 18px; font-weight: 700; }
+  .wcard .d { font-size: 13px; color: var(--text-secondary); }
+  .wcard .d b { color: var(--up); }
+  .wcard svg { width: 100%; height: auto; display: block; }
+  .wcard .lbl, .wcard .ex { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.45; }
+  .with { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .with span { font-size: 12px; background: var(--surface-0); border-radius: 999px; padding: 1px 8px; }
+  .fall { display: flex; flex-wrap: wrap; gap: 8px; }
+  .fall span { font-size: 13px; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; color: var(--text-secondary); }
+  .fall b { color: var(--down); }
+  .srow { display: grid; grid-template-columns: 210px 1fr 110px; gap: 12px; align-items: center; font-size: 15px; padding: 4px 0; border-bottom: 1px solid var(--line); }
+  .srow .bars { display: grid; gap: 3px; }
+  .srow .b { height: 12px; border-radius: 0 3px 3px 0; min-width: 2px; }
+  .srow .b.old { background: var(--old); }
+  .srow .d { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .srow .d b { font-size: 16px; }
+  .srow .d small { display: block; color: var(--text-muted); font-size: 12px; }
+  .lg { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--text-secondary); margin: 6px 0; }
+  .lg i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+  .tbl { overflow-x: auto; }
+  .tbl table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  .tbl th, .tbl td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  .tbl th { color: var(--text-secondary); font-weight: 500; }
+  .tbl td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
+  .regbars { display: grid; gap: 5px; }
+  .regbar { display: grid; grid-template-columns: 90px 1fr; max-width: 760px; gap: 8px; align-items: center; font-size: 13px; }
+  .regbar .st { display: flex; height: 14px; gap: 2px; }
+  .regbar .st span { display: block; height: 100%; }
+  .heat td.c { text-align: center; border: 2px solid var(--surface-1); font-variant-numeric: tabular-nums; min-width: 40px; padding: 5px 2px; }
+  .heat th.col { font-size: 12px; text-align: center; vertical-align: bottom; word-break: keep-all; min-width: 60px; }
+  .heat th.row { white-space: nowrap; }
+  @media (max-width: 860px) {
+    .words { grid-template-columns: 1fr 1fr; } .two { grid-template-columns: 1fr; }
+    .prow { grid-template-columns: 1fr 100px; } .prow .bar { grid-column: 1 / 3; grid-row: 2; } .prow .ex { grid-column: 1 / 3; }
+    .srow { grid-template-columns: 1fr 90px; } .srow .bars { grid-column: 1 / 3; grid-row: 2; }
+  }
   #tip { position: fixed; pointer-events: none; background: var(--text-primary); color: var(--surface-1); font-size: 12px; padding: 6px 8px; border-radius: 6px; opacity: 0; max-width: 320px; z-index: 10; }
   footer { margin-top: 28px; font-size: 12px; color: var(--text-muted); }
   footer a { color: inherit; }
@@ -160,6 +197,42 @@
     <aside class="card detail" id="detail" aria-live="polite"></aside>
   </div>
 
+  <section class="card" aria-label="떠오르는 말">
+    <h2>무엇이 떠오르고 무엇이 사라지나</h2>
+    <p class="q">2024년에는 없거나 드물다가 2026년에 사업명에 자주 쓰이는 표현, 그리고 그 말이 무엇과 함께 쓰였는지 봅니다.</p>
+    <p class="how">방법: 이웃한 두 단어 조합(표현)과 단어의 등장 비율을 2024년과 2026년(9월까지)으로 비교한 로그 오즈비 순위입니다. "함께 쓰인 말"은 그 단어가 든 사업명에 전체 평균보다 1.5배 이상 자주 나온 말입니다.</p>
+    <h3 class="sub">떠오르는 표현</h3>
+    <div class="prows" id="phrases"></div>
+    <h3 class="sub">떠오르는 단어와 함께 쓰인 말</h3>
+    <div class="words" id="words"></div>
+    <h3 class="sub">사라지는 표현</h3>
+    <div class="fall" id="fall"></div>
+    <p class="find" id="f1"></p>
+  </section>
+
+  <section class="card" aria-label="구축 세부">
+    <h2>시스템 구축의 속을 열어 보면</h2>
+    <p class="q">시스템 구축·운영 2,454건을 10개 세부로 나누고, 구축 안에서의 비중이 2024년 → 2026년에 어떻게 바뀌었는지 봅니다.</p>
+    <p class="how">방법: 구축 사업만 따로 임베딩 군집(K-means 10개, 시드 42)으로 나누고, 군집 중심에 가까운 사업명을 읽어 이름을 붙였습니다. 변화가 큰 순서입니다.</p>
+    <div class="lg"><span><i style="background:var(--old)"></i>2024년</span><span><i style="background:var(--up)"></i>2026년, 늘어남</span><span><i style="background:var(--down)"></i>2026년, 줄어듦</span></div>
+    <div class="srows" id="srows"></div>
+    <h3 class="sub">세부별 상세</h3>
+    <div class="tbl" id="subTable"></div>
+    <p class="find" id="f2"></p>
+  </section>
+
+  <section class="card" aria-label="지역별 AX">
+    <h2>지역마다 무엇을 짓나</h2>
+    <p class="q">광역 시·도별 AX 갈래 구성과, 구축 안에서 어떤 세부를 많이 하는지 봅니다.</p>
+    <p class="how">방법: 기관명에서 시·도를 뽑았습니다. 위는 네 갈래 비중(구축 비중 높은 순), 아래는 지역의 구축 사업 안에서 세부 비중(%)입니다.</p>
+    <div class="lg"><span><i style="background:var(--series-1)"></i>구축·운영</span><span><i style="background:var(--series-2)"></i>교육</span><span><i style="background:var(--series-3)"></i>정책·전략</span><span><i style="background:var(--g-etc)"></i>행사·기타</span></div>
+    <div class="regbars" id="regBar"></div>
+    <h3 class="sub">지역의 구축 사업 안에서 세부 비중(%)</h3>
+    <div class="tbl" id="regHeat"></div>
+    <p class="find" id="f3"></p>
+    <p class="note" id="l3"></p>
+  </section>
+
   <section class="card" aria-label="시점과 금액 지도">
     <h2>언제, 얼마짜리를: 시점 × 금액 지도</h2>
     <p class="note">점 하나가 사업 한 건입니다. 가로는 발주 예정 월, 세로는 발주계획 금액(눈금 한 칸마다 10배), 색은 네 갈래입니다. 위 지형도에서 고른 유형과 검색한 기관이 여기에도 표시됩니다.</p>
@@ -175,7 +248,7 @@
   </section>
 
   <footer>
-    방법: 사업명에서 연도·(긴급) 같은 꼬리표를 떼고 qwen/qwen3-embedding-8b로 임베딩(4,096차원) → K-means 10개 군집 → 네 갈래로 묶음. 점 지도는 UMAP 2차원. 시드 42.
+    방법: 사업명에서 연도·(긴급) 같은 꼬리표를 떼고 qwen/qwen3-embedding-8b로 임베딩(4,096차원) → K-means 10개 유형 → 네 갈래로 묶었습니다. 구축 세부는 구축 사업만 다시 10개로 나눴습니다. 떠오르는 말은 사업명 단어·두 단어 조합의 2024년 대비 2026년 등장 비율입니다. 시드 42.
     데이터: 조달청 나라장터 발주계획현황서비스(용역, data.go.kr 15129462), 2024.01~2026.09, 중복 정리 후 5,593건. 공용 프록시(k-skill-proxy)로 조회, 2026-10-29 수집.
     유형 이름은 군집 중심에 가까운 사업명을 읽고 붙였습니다. · <a href="eda.html">탐색적 분석 보기</a> · KAIST ITM.690 실습 1
   </footer>
@@ -184,6 +257,7 @@
 
 <!-- 데이터를 바꾸면 v 값도 바꾼다 (GitHub Pages가 10분간 캐시해서 예전 데이터가 섞이는 것을 막음) -->
 <script src="map-data.js?v=20261030-month"></script>
+<script src="v3-data.js?v=20261030-v3"></script>
 <script>
 (function () {
   const M = window.MAP;
@@ -394,7 +468,6 @@
     });
   }
   window.addEventListener("resize", () => { sizeMap(); drawMap(); });
-  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", drawMap);
   const tip = document.getElementById("tip");
   function nearest(e, max) {
     const r = canvas.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
@@ -435,6 +508,70 @@
 
   sizeMap();
   refresh();
+})();
+</script>
+<script>
+// 떠오르는 말 · 구축 세부 · 지역 (데이터: v3-data.js, scripts/explore_v3.py)
+(function () {
+  const V = window.V3;
+  const fmt = n => Math.round(n).toLocaleString("ko-KR"), eok = n => fmt(n / 1e8);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const SEQ = ["--seq-0", "--seq-1", "--seq-2", "--seq-3", "--seq-4", "--seq-5", "--seq-6", "--seq-7"];
+  const spark = arr => { const W = 200, H = 40, P = 4, max = Math.max(...arr, .1);
+    const pts = arr.map((v, i) => [P + i / (arr.length - 1) * (W - 2 * P), H - P - v / max * (H - 2 * P)]);
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="분기별 등장 비율"><polyline fill="none" stroke="var(--up)" stroke-width="2" points="${pts.map(p => p.join(",")).join(" ")}"/><circle cx="${pts.at(-1)[0]}" cy="${pts.at(-1)[1]}" r="3" fill="var(--up)"/></svg>`; };
+
+  // 떠오르는 말
+  const PH = V.phrases.rising, maxP = Math.max(...PH.map(p => p.new));
+  document.getElementById("phrases").innerHTML = PH.map(p => `
+    <div class="prow"><div class="nm">${esc(p.phrase)}</div>
+      <div class="bar" title="2024 ${p.old.toFixed(1)}% → 2026 ${p.new.toFixed(1)}%"><span style="width:${p.new / maxP * 100}%"></span></div>
+      <div class="v">${p.old.toFixed(1)}% → <b>${p.new.toFixed(1)}%</b> · ${fmt(p.count)}건</div>
+      <div class="ex">예: ${esc(p.examples[0] || "")}</div></div>`).join("");
+  const R = V.words.rising.filter(w => !(w.word === "Agent" && V.words.rising.some(x => x.word === "에이전트")));
+  document.getElementById("words").innerHTML = R.slice(0, 12).map(w => `
+    <div class="wcard">
+      <div class="w">${esc(w.word)}</div>
+      <div class="d">${w.old.toFixed(1)}% → <b>${w.new.toFixed(1)}%</b> · ${fmt(w.count)}건 · 기관 ${fmt(w.insts)}곳</div>
+      ${spark(w.series)}
+      <div class="lbl">함께 쓰인 말</div>
+      <div class="with">${(w.with.length ? w.with : [["뚜렷한 조합 없음", ""]]).map(([k, n]) => `<span>${esc(k)}${n ? " " + n : ""}</span>`).join("")}</div>
+      <div class="ex">예: ${esc(w.examples[0] || "")}</div>
+    </div>`).join("");
+  document.getElementById("fall").innerHTML = V.phrases.falling.map(p => `<span>${esc(p.phrase)} ${p.old.toFixed(1)}% → <b>${p.new.toFixed(1)}%</b></span>`).join("");
+  const ax = R.find(w => w.word === "AX"), top = PH[0], task = R.find(w => w.word === "과제");
+  document.getElementById("f1").innerHTML = `<b>발견:</b> 가장 크게 떠오른 표현은 <b>"${esc(top.phrase)}"</b>(${top.old.toFixed(1)}% → ${top.new.toFixed(1)}%, ${top.count}건)입니다. "AX"는 사업명의 ${ax.old.toFixed(1)}% → ${ax.new.toFixed(1)}%로 퍼졌는데, ${ax.with.slice(0, 3).map(([k, n]) => `${esc(k)}(${n})`).join(", ")} 같은 말과 함께 쓰여 반도체·디바이스 AX라는 흐름이 따로 보입니다.${task ? ` 혼자서는 뜻이 약한 "과제"도 함께 쓰인 말(${task.with.slice(0, 3).map(([k]) => esc(k)).join(", ")})을 보면 과제 발굴·공모 사업입니다.` : ""} 사라진 표현은 ${V.phrases.falling.slice(0, 3).map(p => `"${esc(p.phrase)}"`).join(", ")} 등입니다.`;
+
+  // 구축 세부
+  const S = [...V.subs].sort((a, b) => Math.abs(b.share[2] - b.share[0]) - Math.abs(a.share[2] - a.share[0]));
+  const mx = Math.max(...S.flatMap(s => [s.share[0], s.share[2]]));
+  document.getElementById("srows").innerHTML = S.map(s => { const d = s.share[2] - s.share[0], up = d >= 0;
+    return `<div class="srow"><div>${esc(s.name)}</div>
+      <div class="bars"><div class="b old" style="width:${s.share[0] / mx * 100}%" title="2024 ${s.share[0]}%"></div><div class="b" style="width:${s.share[2] / mx * 100}%;background:var(${up ? "--up" : "--down"})" title="2026 ${s.share[2]}%"></div></div>
+      <div class="d"><b style="color:var(${up ? "--up" : "--down"})">${up ? "+" : ""}${d.toFixed(1)}%p</b><small>${s.share[0]}% → ${s.share[2]}%</small></div></div>`; }).join("");
+  document.getElementById("subTable").innerHTML = `<table><tr><th>세부</th><th class="n">건수</th><th class="n">금액(억 원)</th><th>많이 낸 기관</th><th>이 세부에 특히 많은 표현</th></tr>` +
+    V.subs.map(s => `<tr><td>${esc(s.name)}</td><td class="n">${fmt(s.count)}</td><td class="n">${eok(s.amount)}</td><td>${s.insts.slice(0, 2).map(([n, k]) => `${esc(n)} ${k}`).join("<br>")}</td><td>${s.phrases.slice(0, 3).map(([w, n]) => `${esc(w)} ${n}`).join("<br>")}</td></tr>`).join("") + `</table>`;
+  const ds = V.subs.map(s => [s.name, s.share[2] - s.share[0], s.share]).sort((a, b) => b[1] - a[1]);
+  const ups = ds.filter(x => x[1] > 0).slice(0, 4), dns = ds.filter(x => x[1] < 0).slice(-4).reverse();
+  document.getElementById("f2").innerHTML = `<b>발견:</b> 구축 안에서 ${ups.map(x => `${esc(x[0])}(${x[2][0]}% → ${x[2][2]}%)`).join(", ")}가 커졌고, ${dns.map(x => `${esc(x[0])}(${x[2][0]}% → ${x[2][2]}%)`).join(", ")}는 줄었습니다. <b>개별 예측 모델·시설·단일 서비스를 하나씩 짓던 데서, 실증·공통 플랫폼·업무 시스템·생성형 AI로 무게가 옮겨 가고 있습니다.</b>`;
+
+  // 지역
+  const RG = V.region, GV = ["--series-1", "--series-2", "--series-3", "--g-etc"];
+  const order = [...V.regions].sort((a, b) => RG[b].groups[0] / RG[b].n - RG[a].groups[0] / RG[a].n);
+  document.getElementById("regBar").innerHTML = order.map(k => { const v = RG[k];
+    return `<div class="regbar"><span>${k} <span class="note">(${v.n})</span></span><div class="st">${v.groups.map((n, gi) => n ? `<span style="flex:${n};background:var(${GV[gi]})" title="${k} ${Math.round(n / v.n * 100)}%"></span>` : "").join("")}</div></div>`; }).join("");
+  const subs = V.sub_names, cuts = [0, 5, 10, 15, 20, 25, 30, 40], notable = [];
+  const heatRegs = order.filter(k => RG[k].groups[0] >= 10);
+  let h = `<table class="heat"><tr><th></th>${subs.map(n => `<th class="col">${esc(n)}</th>`).join("")}</tr>`;
+  heatRegs.forEach(k => { const b = RG[k].build_subs, tot = b.reduce((a, c) => a + c, 0);
+    h += `<tr><th class="row">${k} <span class="note">(${tot})</span></th>` + b.map((n, i) => { const p = tot ? Math.round(n / tot * 100) : 0, si = cuts.filter(c => p >= c).length - 1;
+      if (p >= 30 && n >= 5) notable.push([k, subs[i], p, n]);
+      return `<td class="c" title="${k} · ${subs[i]} ${n}건" style="background:var(${SEQ[si]});color:${si >= 5 ? "#fff" : "inherit"}">${p || ""}</td>`; }).join("") + `</tr>`; });
+  document.getElementById("regHeat").innerHTML = h + `</table>`;
+  notable.sort((a, b) => b[2] - a[2]);
+  const pc = (k, gi) => Math.round(RG[k].groups[gi] / RG[k].n * 100);
+  document.getElementById("f3").innerHTML = `<b>발견:</b> 구축 비중은 ${order.slice(0, 3).map(k => `${k} ${pc(k, 0)}%`).join(", ")} 순으로 높고, ${order.slice(-2).map(k => `${k} ${pc(k, 0)}%`).join(", ")}는 낮습니다. 구축 안에서 한 세부가 30% 이상인 지역은 ${notable.slice(0, 5).map(x => `${x[0]}의 ${esc(x[1])}(${x[2]}%, ${x[3]}건)`).join(", ")}입니다. <b>지역마다 짓는 AI가 다릅니다.</b>`;
+  document.getElementById("l3").textContent = `한계: 기관명에서 시·도를 뽑을 수 있는 건은 ${fmt(V.region_coverage)}건(전체의 ${Math.round(V.region_coverage / V.total * 100)}%)이고, 아래 표는 구축 사업이 10건 이상인 지역만 넣었습니다. 지역별 건수가 작아 한두 사업에 비중이 크게 흔들립니다.`;
 })();
 </script>
 </body>
