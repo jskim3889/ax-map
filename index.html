@@ -5,573 +5,500 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>공공 AX 지도</title>
 <meta name="description" content="나라장터 AI 관련 발주계획 5,593건으로 본 공공기관 AX 지형도">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
+  /* 한국데이터소프트 톤: 흰 바탕, 파랑 하나와 그 명도 단계, 가는 파랑 구분선 (근거: webapp/DECISIONS.md 10-30) */
   :root {
     color-scheme: light;
-    --surface-0: #f4f3ef; --surface-1: #fcfcfb;
-    --text-primary: #0b0b0b; --text-secondary: #52514e; --text-muted: #7a7974;
-    --line: #e2e0da;
-    --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --g-etc: #a3a199;
+    --brand: #0032ff; --brand-deep: #0a1f7a; --brand-soft: #e8edff; --brand-line: #b8c8f8; --brand-light: #7f98ff;
+    --ink: #111111; --body: #303030; --muted: #5f6470; --line: #e4e7ee; --bg: #fcfcfc; --paper: #ffffff;
+    --dot: #d6def7; --gray: #c4c9d4; --old: #d5d9e2; --down: #7d8494;
+    /* 네 갈래: 같은 파랑의 명도 단계 + 회색 */
+    --g-build: var(--brand); --g-edu: var(--brand-light); --g-policy: var(--brand-deep); --g-etc: var(--gray);
+    --seq-0: #f6f8ff; --seq-1: #e8edff; --seq-2: #c9d5ff; --seq-3: #a3b6ff; --seq-4: #7090ff; --seq-5: #3d63ff; --seq-6: #0032ff; --seq-7: #0a1f7a;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--surface-0); color: var(--text-primary); font-family: "Noto Sans KR", system-ui, sans-serif; line-height: 1.6; }
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px 56px; }
-  header { padding: 32px 0 8px; }
-  .eyebrow { color: var(--text-muted); font-size: 13px; letter-spacing: .06em; margin: 0; }
-  .eyebrow a { color: inherit; }
-  h1 { font-size: clamp(26px, 5vw, 36px); margin: 4px 0 6px; }
-  h2 { font-size: 18px; margin: 0 0 6px; }
-  .note { color: var(--text-muted); font-size: 13px; margin: 0; }
-  .card { background: var(--surface-1); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-top: 16px; }
+  body { margin: 0; background: var(--bg); color: var(--body); font: 15px/1.7 "Pretendard", "Malgun Gothic", system-ui, sans-serif; letter-spacing: -0.01em; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px 64px; }
+  a { color: var(--brand); }
+  .num { font-variant-numeric: tabular-nums; }
+  .muted { color: var(--muted); }
+  .small { font-size: 13px; }
 
-  /* 맨 위 결론 */
-  .lead { color: var(--text-secondary); margin: 0 0 14px; font-size: 16px; }
-  .groups { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  .group .pct { font-size: 26px; font-weight: 700; line-height: 1.2; }
-  .group .gname { font-weight: 500; }
-  .gsw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
-  .group p { margin: 4px 0 0; font-size: 13px; color: var(--text-secondary); }
+  /* 머리 */
+  header { position: relative; padding: 40px 0 22px; border-bottom: 2px solid var(--brand); }
+  header::after { content: ""; position: absolute; right: 0; top: 24px; width: 220px; height: 120px; pointer-events: none;
+    background-image: radial-gradient(var(--dot) 1.4px, transparent 1.6px); background-size: 10px 10px;
+    -webkit-mask-image: linear-gradient(to left, #000, transparent); mask-image: linear-gradient(to left, #000, transparent); }
+  .crumb { position: relative; z-index: 1; margin: 0; font-size: 13px; font-weight: 700; color: var(--brand); letter-spacing: .04em; }
+  .crumb a { color: var(--muted); font-weight: 500; text-decoration: none; }
+  .crumb a:hover { color: var(--brand); }
+  h1 { position: relative; z-index: 1; margin: 8px 0 10px; font-size: clamp(24px, 4.2vw, 34px); line-height: 1.35; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; word-break: keep-all; }
+  .scope { position: relative; z-index: 1; margin: 0; color: var(--muted); font-size: 14px; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); margin: 0; padding: 18px 0 0; }
+  .kpi { padding: 0 16px; border-left: 1px solid var(--line); }
+  .kpi:first-child { padding-left: 0; border-left: 0; }
+  .kpi dt { font-size: 14px; color: var(--body); }
+  .kpi dd { margin: 0; font-size: 28px; font-weight: 800; color: var(--ink); line-height: 1.2; }
+  .kpi dd small { font-size: 14px; font-weight: 500; color: var(--muted); margin-left: 4px; }
+  .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
 
-  /* 사용법 */
-  .steps { list-style: none; margin: 10px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-  .steps li { display: flex; gap: 10px; font-size: 14px; color: var(--text-secondary); }
-  .steps b { color: var(--text-primary); }
-  .step { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--text-primary); color: var(--surface-1); font-weight: 700; font-size: 13px; }
+  /* 번호 붙은 절 */
+  section.sec { padding: 34px 0 6px; }
+  .sec + .sec { border-top: 1px solid var(--line); margin-top: 26px; }
+  .no { margin: 0; font-size: 13px; font-weight: 800; color: var(--brand); letter-spacing: .08em; }
+  .no span { color: var(--muted); font-weight: 500; letter-spacing: 0; margin-left: 8px; }
+  h2 { margin: 4px 0 8px; font-size: clamp(19px, 2.8vw, 23px); line-height: 1.45; font-weight: 800; color: var(--ink); word-break: keep-all; }
+  .lede { margin: 0 0 18px; max-width: 760px; word-break: keep-all; }
+  h3 { margin: 26px 0 10px; font-size: 15px; font-weight: 700; color: var(--ink); }
 
-  /* 지형도 */
-  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; }
-  .layout > .card { margin-top: 16px; }
-  .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
-  .controls input { flex: 1 1 220px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-0); color: var(--text-primary); font: inherit; }
-  .controls button, .chip { padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-0); color: var(--text-primary); font: inherit; font-size: 14px; cursor: pointer; }
-  .chip { padding: 5px 11px; border-radius: 999px; font-size: 13px; }
-  .chip:hover { border-color: var(--text-muted); }
-  .try { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+  /* 01 지형도 */
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; }
+  .controls { display: flex; gap: 8px; margin-bottom: 8px; }
+  .controls input { flex: 1; min-width: 0; font: inherit; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 4px; background: var(--paper); color: var(--ink); }
+  .controls input:focus { outline: none; border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-soft); }
+  .controls button { font: inherit; font-size: 14px; padding: 0 14px; border: 1.5px solid var(--line); border-radius: 4px; background: var(--paper); color: var(--body); cursor: pointer; }
+  .controls button:hover { border-color: var(--brand-line); color: var(--brand); }
+  .try { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; }
+  .chip { font: inherit; font-size: 13px; padding: 3px 11px; border: 1px solid var(--brand-line); border-radius: 999px; background: var(--paper); color: var(--brand-deep); cursor: pointer; }
+  .chip:hover { background: var(--brand-soft); }
   .tree { display: flex; gap: 6px; height: 520px; }
   .tgroup { display: flex; flex-direction: column; min-width: 120px; }
-  .tglabel { font-size: 13px; font-weight: 700; padding: 2px 2px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tglabel { font-size: 14px; font-weight: 700; color: var(--ink); padding: 0 2px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tcells { flex: 1; display: flex; flex-direction: column; gap: 4px; min-height: 0; }
-  .tcell {
-    position: relative; min-height: 46px; border: 0; border-left: 5px solid var(--gc); border-radius: 6px;
-    background: color-mix(in srgb, var(--gc) 22%, var(--surface-1)); color: var(--text-primary);
-    font: inherit; text-align: left; padding: 8px 10px; cursor: pointer; overflow: hidden;
-    display: flex; flex-direction: column; justify-content: flex-start;
-  }
-  .tcell:hover { background: color-mix(in srgb, var(--gc) 34%, var(--surface-1)); }
-  .tcell[aria-pressed="true"] { outline: 3px solid var(--text-primary); outline-offset: -3px; }
-  .tcell .nm { font-weight: 700; font-size: 14px; line-height: 1.3; }
-  .tcell .ct { font-size: 13px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
-  .tcell .ex { font-size: 12px; color: var(--text-secondary); margin-top: 4px; line-height: 1.4; }
-  .tcell .hit { position: absolute; right: 8px; top: 8px; background: var(--text-primary); color: var(--surface-1); font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; }
+  .tcell { position: relative; min-height: 48px; border: 0; border-top: 3px solid var(--gc); border-radius: 2px;
+    background: color-mix(in srgb, var(--gc) 9%, var(--paper)); color: var(--ink);
+    font: inherit; text-align: left; padding: 8px 10px; cursor: pointer; overflow: hidden; display: flex; flex-direction: column; }
+  .tcell:hover { background: color-mix(in srgb, var(--gc) 18%, var(--paper)); }
+  .tcell:focus-visible { outline: 2px solid var(--brand); outline-offset: 1px; }
+  .tcell[aria-pressed="true"] { box-shadow: inset 0 0 0 2px var(--ink); }
+  .tcell .nm { font-weight: 700; font-size: 14px; line-height: 1.35; }
+  .tcell .ct { font-size: 13px; color: var(--muted); }
+  .tcell .ex { font-size: 13px; color: var(--muted); margin-top: 4px; line-height: 1.45; }
+  .tcell .hit { position: absolute; right: 8px; top: 8px; background: var(--brand); color: #fff; font-size: 13px; font-weight: 700; padding: 0 8px; border-radius: 999px; }
   .tcell.dim { opacity: .35; }
-  .status { margin: 10px 0 0; font-size: 14px; min-height: 1.6em; }
+  .status { margin: 10px 0 0; font-size: 14px; color: var(--muted); min-height: 1.7em; }
+  .detail { border-left: 1px solid var(--line); padding-left: 22px; font-size: 14px; }
+  .detail .k { margin: 16px 0 4px; font-size: 13px; font-weight: 700; color: var(--brand); }
+  .detail .k:first-child { margin-top: 0; }
+  .detail .big { font-size: 20px; font-weight: 800; color: var(--ink); line-height: 1.4; }
+  .detail ul { margin: 0; padding-left: 18px; }
+  .detail hr { border: 0; border-top: 1px solid var(--line); margin: 18px 0; }
+  .detail .empty { color: var(--muted); }
+  .gbar { display: grid; grid-template-columns: 100px 1fr 40px; gap: 6px; align-items: center; font-size: 13px; margin: 4px 0; }
+  .gbar .t { height: 10px; min-width: 2px; }
+  .gbar .v { text-align: right; color: var(--muted); }
 
-  /* 상세 */
-  .detail h3 { font-size: 15px; margin: 14px 0 4px; color: var(--text-secondary); font-weight: 500; }
-  .detail h3:first-child { margin-top: 0; }
-  .detail .big { font-size: 22px; font-weight: 700; }
-  .detail ul { margin: 0; padding-left: 18px; font-size: 13px; color: var(--text-secondary); }
-  .bar { display: grid; grid-template-columns: 110px 1fr 44px; gap: 6px; align-items: center; font-size: 13px; margin: 4px 0; }
-  .bar .t { height: 10px; border-radius: 0 3px 3px 0; min-width: 2px; }
-  .bar .v { text-align: right; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
-  .empty { font-size: 14px; color: var(--text-secondary); }
+  /* 02 표현 */
+  .rows { display: grid; }
+  .prow { display: grid; grid-template-columns: 190px 1fr 150px; gap: 4px 14px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .prow .nm { font-weight: 700; color: var(--ink); }
+  .track { position: relative; height: 10px; background: var(--brand-soft); }
+  .track span { position: absolute; left: 0; top: 0; bottom: 0; background: var(--brand); }
+  .prow .v { text-align: right; font-size: 14px; white-space: nowrap; }
+  .prow .v b { color: var(--brand); }
+  .prow .ex { grid-column: 2 / 4; font-size: 13px; color: var(--muted); }
+  .wrow { display: grid; grid-template-columns: 110px 150px 96px 1fr; gap: 4px 14px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .wrow.head { font-size: 13px; color: var(--muted); padding-top: 0; border-bottom: 2px solid var(--brand); }
+  .wrow .w { font-size: 16px; font-weight: 800; color: var(--ink); }
+  .wrow .d b { color: var(--brand); }
+  .wrow svg { width: 96px; height: 24px; display: block; }
+  .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tags span { font-size: 13px; background: var(--brand-soft); color: var(--brand-deep); padding: 0 8px; border-radius: 2px; }
+  .tags .none { background: none; color: var(--muted); padding: 0; }
+  .fall { margin: 0; font-size: 14px; }
 
-  /* 점으로 보기 */
-  details.card summary { cursor: pointer; font-weight: 700; }
-  details.card[open] summary { margin-bottom: 10px; }
-  .key { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
-  .canvas-box { position: relative; width: 100%; aspect-ratio: 16 / 9; }
-  @media (max-width: 860px) { .canvas-box { aspect-ratio: 4 / 3; } }
-  canvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
-
-  .reading ol { margin: 0; padding-left: 22px; color: var(--text-secondary); }
-  .reading li { margin: 6px 0; }
-  .reading b { color: var(--text-primary); }
-  /* 떠오르는 말 · 구축 세부 · 지역 */
-  :root { --up: #2a78d6; --down: #eb6834; --old: #b7b5ad;
-    --seq-0: #f0f5fc; --seq-1: #cde2fb; --seq-2: #9ec5f4; --seq-3: #6da7ec; --seq-4: #3987e5; --seq-5: #256abf; --seq-6: #184f95; --seq-7: #0d366b; }
-  .card h3.sub { font-size: 15px; margin: 18px 0 8px; }
-  .q { color: var(--text-secondary); margin: 0 0 4px; }
-  .how { font-size: 12px; color: var(--text-muted); margin: 0 0 10px; }
-  .find { font-size: 15px; background: var(--surface-0); border-radius: 6px; padding: 10px 12px; margin: 14px 0 0; }
-  .prows, .srows { display: grid; gap: 6px; }
-  .prow { display: grid; grid-template-columns: 170px 1fr 130px; gap: 10px; align-items: center; font-size: 14px; }
-  .prow .nm { font-weight: 700; }
-  .prow .bar { position: relative; height: 12px; background: var(--surface-0); border-radius: 3px; }
-  .prow .bar span { position: absolute; left: 0; top: 0; height: 12px; border-radius: 3px; background: var(--up); }
-  .prow .v { font-size: 13px; color: var(--text-secondary); text-align: right; white-space: nowrap; }
-  .prow .ex { grid-column: 2 / 4; font-size: 12px; color: var(--text-muted); margin-top: -4px; }
-  .words { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-  .wcard { border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
-  .wcard .w { font-size: 18px; font-weight: 700; }
-  .wcard .d { font-size: 13px; color: var(--text-secondary); }
-  .wcard .d b { color: var(--up); }
-  .wcard svg { width: 100%; height: auto; display: block; }
-  .wcard .lbl, .wcard .ex { font-size: 12px; color: var(--text-muted); margin-top: 4px; line-height: 1.45; }
-  .with { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
-  .with span { font-size: 12px; background: var(--surface-0); border-radius: 999px; padding: 1px 8px; }
-  .fall { display: flex; flex-wrap: wrap; gap: 8px; }
-  .fall span { font-size: 13px; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; color: var(--text-secondary); }
-  .fall b { color: var(--down); }
-  .srow { display: grid; grid-template-columns: 210px 1fr 110px; gap: 12px; align-items: center; font-size: 15px; padding: 4px 0; border-bottom: 1px solid var(--line); }
+  /* 03 구축 세부 */
+  .lg { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--muted); margin: 0 0 6px; }
+  .srow { display: grid; grid-template-columns: 220px 1fr 120px; gap: 4px 14px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .srow .nm { color: var(--ink); font-weight: 500; }
   .srow .bars { display: grid; gap: 3px; }
-  .srow .b { height: 12px; border-radius: 0 3px 3px 0; min-width: 2px; }
+  .srow .b { height: 10px; min-width: 2px; }
   .srow .b.old { background: var(--old); }
-  .srow .d { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .srow .d { text-align: right; white-space: nowrap; }
   .srow .d b { font-size: 16px; }
-  .srow .d small { display: block; color: var(--text-muted); font-size: 12px; }
-  .lg { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--text-secondary); margin: 6px 0; }
-  .lg i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
-  .tbl { overflow-x: auto; }
-  .tbl table { border-collapse: collapse; width: 100%; font-size: 14px; }
-  .tbl th, .tbl td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
-  .tbl th { color: var(--text-secondary); font-weight: 500; }
-  .tbl td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
-  .regbars { display: grid; gap: 5px; }
-  .regbar { display: grid; grid-template-columns: 90px 1fr; max-width: 760px; gap: 8px; align-items: center; font-size: 13px; }
+  .srow .d small { display: block; color: var(--muted); font-size: 13px; }
+
+  /* 04 지역 */
+  .regbar { display: grid; grid-template-columns: 96px 1fr; gap: 10px; align-items: center; font-size: 14px; padding: 3px 0; }
   .regbar .st { display: flex; height: 14px; gap: 2px; }
   .regbar .st span { display: block; height: 100%; }
-  .heat td.c { text-align: center; border: 2px solid var(--surface-1); font-variant-numeric: tabular-nums; min-width: 40px; padding: 5px 2px; }
-  .heat th.col { font-size: 12px; text-align: center; vertical-align: bottom; word-break: keep-all; min-width: 60px; }
+
+  /* 표 */
+  .tbl { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { padding: 7px 8px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  thead th { color: var(--muted); font-weight: 500; font-size: 13px; border-bottom: 2px solid var(--brand); }
+  td.n { text-align: right; white-space: nowrap; }
+  .heat td.c { text-align: center; border: 2px solid var(--bg); min-width: 40px; padding: 5px 2px; }
+  .heat th.col { font-size: 13px; text-align: center; vertical-align: bottom; word-break: keep-all; min-width: 64px; }
   .heat th.row { white-space: nowrap; }
-  @media (max-width: 860px) {
-    .words { grid-template-columns: 1fr 1fr; } .two { grid-template-columns: 1fr; }
-    .prow { grid-template-columns: 1fr 100px; } .prow .bar { grid-column: 1 / 3; grid-row: 2; } .prow .ex { grid-column: 1 / 3; }
-    .srow { grid-template-columns: 1fr 90px; } .srow .bars { grid-column: 1 / 3; grid-row: 2; }
-  }
-  #tip { position: fixed; pointer-events: none; background: var(--text-primary); color: var(--surface-1); font-size: 12px; padding: 6px 8px; border-radius: 6px; opacity: 0; max-width: 320px; z-index: 10; }
-  footer { margin-top: 28px; font-size: 12px; color: var(--text-muted); }
-  footer a { color: inherit; }
+
+  /* 접어 둔 부분 */
+  details.more { margin-top: 18px; border-top: 1px solid var(--line); }
+  details.more > summary { cursor: pointer; padding: 12px 0; font-weight: 700; color: var(--brand-deep); list-style: none; }
+  details.more > summary::-webkit-details-marker { display: none; }
+  details.more > summary::before { content: "+"; display: inline-block; width: 18px; color: var(--brand); font-weight: 800; }
+  details.more[open] > summary::before { content: "−"; }
+  .canvas-box { position: relative; width: 100%; aspect-ratio: 16 / 8; }
+  canvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
+  .method { font-size: 14px; }
+  .method dt { font-weight: 700; color: var(--ink); margin-top: 12px; }
+  .method dd { margin: 2px 0 0; }
+
+  #tip { position: fixed; pointer-events: none; background: var(--ink); color: #fff; font-size: 13px; padding: 6px 9px; border-radius: 3px; opacity: 0; max-width: 320px; z-index: 10; }
+  footer { margin-top: 40px; padding-top: 14px; border-top: 2px solid var(--brand); font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 16px; }
+  footer a { color: var(--muted); }
 
   @media (max-width: 860px) {
+    .kpis { grid-template-columns: 1fr 1fr; row-gap: 14px; }
+    .kpi:nth-child(3) { padding-left: 0; border-left: 0; }
     .layout { grid-template-columns: 1fr; }
-    .groups { grid-template-columns: 1fr 1fr; }
-    .steps { grid-template-columns: 1fr; }
-    /* 좁은 화면: 갈래는 위아래로, 세부 유형은 가로로 */
+    .detail { border-left: 0; padding-left: 0; border-top: 1px solid var(--line); padding-top: 16px; }
+    /* 좁은 화면: 갈래는 위아래로, 유형은 가로로. 넓은 화면용 인라인 flex(건수 비례)를 덮어써서 겹치지 않게 한다 */
     .tree { flex-direction: column; height: auto; }
-    /* 넓은 화면용 인라인 flex(건수 비례)를 덮어써서 겹치지 않게 한다. 비율은 칸 안 % 숫자로 읽는다 */
     .tgroup { flex: none !important; min-width: 0; }
     .tcells { flex-direction: row; flex-wrap: wrap; }
     .tcell { flex: 1 1 40% !important; min-height: 96px; }
+    .prow { grid-template-columns: 1fr auto; } .prow .track { grid-column: 1 / 3; grid-row: 2; } .prow .ex { grid-column: 1 / 3; }
+    .wrow { grid-template-columns: 1fr auto; } .wrow.head { display: none; } .wrow svg { display: none; } .wrow .tags { grid-column: 1 / 3; }
+    .srow { grid-template-columns: 1fr auto; } .srow .bars { grid-column: 1 / 3; grid-row: 2; }
+    .canvas-box { aspect-ratio: 4 / 3; }
   }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <p class="eyebrow"><a href="/">← AIZENT</a> · 공공 AX 지도 · <a href="eda.html">탐색적 분석</a></p>
-    <h1>공공기관들은 AX를 어떻게 하는가</h1>
-    <p class="note" id="scope"></p>
+    <p class="crumb"><a href="/">← AIZENT</a> &nbsp;/&nbsp; 공공 AX 지도</p>
+    <h1 id="h1"></h1>
+    <p class="scope" id="scope"></p>
+    <dl class="kpis" id="kpis"></dl>
   </header>
 
-  <section class="card" aria-label="한눈에 보는 결론">
-    <h2>한눈에 보기</h2>
-    <p class="lead" id="lead"></p>
-    <div class="groups" id="groups"></div>
-  </section>
-
-  <section class="card" aria-label="사용 방법">
-    <h2>이렇게 사용합니다</h2>
-    <ol class="steps">
-      <li><span class="step">1</span><div><b>칸 크기 = 사업 건수</b><br>아래 AX 지형도에서 칸이 클수록 그 방식의 AX 사업이 많습니다. 색은 네 갈래입니다.</div></li>
-      <li><span class="step">2</span><div><b>칸 누르기</b><br>칸을 누르면 오른쪽에 그 유형의 연도별 변화, 많이 발주한 기관, 금액이 큰 사업이 나옵니다.</div></li>
-      <li><span class="step">3</span><div><b>우리 기관 찾기</b><br>기관명을 검색하면 각 칸에 그 기관의 건수가 붙고, 오른쪽에 그 기관의 AX 구성이 나옵니다.</div></li>
-    </ol>
-  </section>
-
-  <div class="layout">
-    <section class="card" aria-label="AX 지형도">
-      <h2>AX 지형도</h2>
-      <div class="controls">
-        <input id="q" type="search" placeholder="기관명으로 찾기 (예: 국민건강보험공단, 교육청)" aria-label="기관명 검색" list="insts">
-        <datalist id="insts"></datalist>
-        <button id="reset" type="button">초기화</button>
+  <section class="sec" aria-labelledby="h-01">
+    <p class="no">01<span>AX 지형도</span></p>
+    <h2 id="h-01"></h2>
+    <p class="lede">칸 크기가 사업 건수입니다. 칸을 누르면 그 유형의 상세가, 기관명을 넣으면 칸마다 그 기관의 건수가 나옵니다.</p>
+    <div class="layout">
+      <div>
+        <div class="controls">
+          <input id="q" type="search" placeholder="기관명 입력 (예: 교육청)" aria-label="기관명 검색" list="insts">
+          <datalist id="insts"></datalist>
+          <button id="reset" type="button">초기화</button>
+        </div>
+        <div class="try">
+          <button type="button" class="chip" data-query="국민건강보험공단">국민건강보험공단</button>
+          <button type="button" class="chip" data-query="교육청">교육청 전체</button>
+          <button type="button" class="chip" data-query="서울특별시">서울특별시</button>
+          <button type="button" class="chip" data-cluster="8">AX 전략·컨설팅</button>
+        </div>
+        <div class="tree" id="tree"></div>
+        <p class="status" id="status" aria-live="polite"></p>
       </div>
-      <div class="tree" id="tree"></div>
-      <p class="status" id="status" aria-live="polite"></p>
-    </section>
-
-    <aside class="card detail" id="detail" aria-live="polite"></aside>
-  </div>
-
-  <section class="card" aria-label="떠오르는 말">
-    <h2>무엇이 떠오르고 무엇이 사라지나</h2>
-    <p class="q">2024년에는 없거나 드물다가 2026년에 사업명에 자주 쓰이는 표현, 그리고 그 말이 무엇과 함께 쓰였는지 봅니다.</p>
-    <p class="how">방법: 이웃한 두 단어 조합(표현)과 단어의 등장 비율을 2024년과 2026년(9월까지)으로 비교한 로그 오즈비 순위입니다. "함께 쓰인 말"은 그 단어가 든 사업명에 전체 평균보다 1.5배 이상 자주 나온 말입니다.</p>
-    <h3 class="sub">떠오르는 표현</h3>
-    <div class="prows" id="phrases"></div>
-    <h3 class="sub">떠오르는 단어와 함께 쓰인 말</h3>
-    <div class="words" id="words"></div>
-    <h3 class="sub">사라지는 표현</h3>
-    <div class="fall" id="fall"></div>
-    <p class="find" id="f1"></p>
+      <aside class="detail" id="detail" aria-live="polite"></aside>
+    </div>
+    <details class="more" id="mapMore">
+      <summary>시점 × 금액으로 한 건씩 보기</summary>
+      <p class="small muted" id="mapNote"></p>
+      <div class="lg" id="key"></div>
+      <div class="canvas-box"><canvas id="map" role="img" aria-label="발주 시점과 금액에 따른 AI 관련 발주계획 산점도"></canvas></div>
+    </details>
   </section>
 
-  <section class="card" aria-label="구축 세부">
-    <h2>시스템 구축의 속을 열어 보면</h2>
-    <p class="q">시스템 구축·운영 2,454건을 10개 세부로 나누고, 구축 안에서의 비중이 2024년 → 2026년에 어떻게 바뀌었는지 봅니다.</p>
-    <p class="how">방법: 구축 사업만 따로 임베딩 군집(K-means 10개, 시드 42)으로 나누고, 군집 중심에 가까운 사업명을 읽어 이름을 붙였습니다. 변화가 큰 순서입니다.</p>
-    <div class="lg"><span><i style="background:var(--old)"></i>2024년</span><span><i style="background:var(--up)"></i>2026년, 늘어남</span><span><i style="background:var(--down)"></i>2026년, 줄어듦</span></div>
-    <div class="srows" id="srows"></div>
-    <h3 class="sub">세부별 상세</h3>
-    <div class="tbl" id="subTable"></div>
-    <p class="find" id="f2"></p>
+  <section class="sec" aria-labelledby="h-02">
+    <p class="no">02<span>떠오르는 표현</span></p>
+    <h2 id="h-02"></h2>
+    <p class="lede" id="f1"></p>
+    <div class="rows" id="phrases"></div>
+    <h3>떠오르는 단어와 함께 쓰인 말</h3>
+    <div class="rows" id="words"></div>
+    <h3>줄어든 표현</h3>
+    <p class="fall" id="fall"></p>
   </section>
 
-  <section class="card" aria-label="지역별 AX">
-    <h2>지역마다 무엇을 짓나</h2>
-    <p class="q">광역 시·도별 AX 갈래 구성과, 구축 안에서 어떤 세부를 많이 하는지 봅니다.</p>
-    <p class="how">방법: 기관명에서 시·도를 뽑았습니다. 위는 네 갈래 비중(구축 비중 높은 순), 아래는 지역의 구축 사업 안에서 세부 비중(%)입니다.</p>
-    <div class="lg"><span><i style="background:var(--series-1)"></i>구축·운영</span><span><i style="background:var(--series-2)"></i>교육</span><span><i style="background:var(--series-3)"></i>정책·전략</span><span><i style="background:var(--g-etc)"></i>행사·기타</span></div>
-    <div class="regbars" id="regBar"></div>
-    <h3 class="sub">지역의 구축 사업 안에서 세부 비중(%)</h3>
+  <section class="sec" aria-labelledby="h-03">
+    <p class="no">03<span>시스템 구축의 세부</span></p>
+    <h2 id="h-03"></h2>
+    <p class="lede" id="f2"></p>
+    <div class="lg"><span><i class="sw" style="background:var(--old)"></i>2024년</span><span><i class="sw" style="background:var(--brand)"></i>2026년, 늘어남</span><span><i class="sw" style="background:var(--down)"></i>2026년, 줄어듦</span></div>
+    <div class="rows" id="srows"></div>
+    <details class="more">
+      <summary>세부별 건수·금액·기관·특징 표현 표</summary>
+      <div class="tbl" id="subTable"></div>
+    </details>
+  </section>
+
+  <section class="sec" aria-labelledby="h-04">
+    <p class="no">04<span>지역</span></p>
+    <h2 id="h-04"></h2>
+    <p class="lede" id="f3"></p>
+    <div class="lg" id="regKey"></div>
+    <div id="regBar"></div>
+    <h3>지역의 구축 사업 안에서 세부 비중(%)</h3>
     <div class="tbl" id="regHeat"></div>
-    <p class="find" id="f3"></p>
-    <p class="note" id="l3"></p>
   </section>
 
-  <section class="card" aria-label="시점과 금액 지도">
-    <h2>언제, 얼마짜리를: 시점 × 금액 지도</h2>
-    <p class="note">점 하나가 사업 한 건입니다. 가로는 발주 예정 월, 세로는 발주계획 금액(눈금 한 칸마다 10배), 색은 네 갈래입니다. 위 지형도에서 고른 유형과 검색한 기관이 여기에도 표시됩니다.</p>
-    <div class="key" id="key"></div>
-    <div class="canvas-box"><canvas id="map" role="img" aria-label="발주 시점과 금액에 따른 AI 관련 발주계획 산점도"></canvas></div>
-    <p class="note" id="mapNote"></p>
-  </section>
-
-  <section class="card reading">
-    <h2>지도 읽기</h2>
-    <ol id="reading"></ol>
-    <p class="note">유형은 사업명만으로 나눈 것이라 경계가 흐릿합니다. 라벨은 칸막이가 아니라 경향이고, 확인은 원문 공고로 합니다.</p>
-  </section>
+  <details class="more" style="margin-top:40px">
+    <summary>방법과 한계</summary>
+    <dl class="method" id="method"></dl>
+  </details>
 
   <footer>
-    방법: 사업명에서 연도·(긴급) 같은 꼬리표를 떼고 qwen/qwen3-embedding-8b로 임베딩(4,096차원) → K-means 10개 유형 → 네 갈래로 묶었습니다. 구축 세부는 구축 사업만 다시 10개로 나눴습니다. 떠오르는 말은 사업명 단어·두 단어 조합의 2024년 대비 2026년 등장 비율입니다. 시드 42.
-    데이터: 조달청 나라장터 발주계획현황서비스(용역, data.go.kr 15129462), 2024.01~2026.09, 중복 정리 후 5,593건. 공용 프록시(k-skill-proxy)로 조회, 2026-10-29 수집.
-    유형 이름은 군집 중심에 가까운 사업명을 읽고 붙였습니다. · <a href="eda.html">탐색적 분석 보기</a> · KAIST ITM.690 실습 1
+    <span>데이터: 조달청 나라장터 발주계획현황서비스(data.go.kr 15129462), 2026-10-29 수집</span>
+    <a href="eda.html">탐색적 분석</a>
+    <span>KAIST ITM.690 실습 1</span>
   </footer>
 </div>
 <div id="tip" role="tooltip"></div>
 
-<!-- 데이터를 바꾸면 v 값도 바꾼다 (GitHub Pages가 10분간 캐시해서 예전 데이터가 섞이는 것을 막음) -->
 <script src="map-data.js?v=20261030-month"></script>
 <script src="v3-data.js?v=20261030-v3"></script>
 <script>
 (function () {
-  const M = window.MAP;
-  const P = M.points; // [x, y, cluster, name, inst, amount, year, kind]
+  const M = window.MAP, V = window.V3;
+  const P = M.points; // [x, y, cluster, name, inst, amount, year, kind, month]
   const C = M.clusters, G = M.groups;
   const byId = Object.fromEntries(C.map(c => [c.id, c]));
-  const GCOLOR = { build: "--series-1", edu: "--series-2", policy: "--series-3", etc: "--g-etc" };
+  const GCOLOR = { build: "--g-build", edu: "--g-edu", policy: "--g-policy", etc: "--g-etc" };
+  const GV = ["--g-build", "--g-edu", "--g-policy", "--g-etc"];
   const groupOf = Object.fromEntries(C.map(c => [c.id, c.group]));
   const gById = Object.fromEntries(G.map(g => [g.key, g]));
-  const fmt = n => n.toLocaleString("ko-KR");
+  const fmt = n => Math.round(n).toLocaleString("ko-KR");
   const eok = n => (n / 1e8).toLocaleString("ko-KR", { maximumFractionDigits: 1 });
   const pct = (n, d) => Math.round((n / d) * 100);
   const esc = s => String(s).replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
   const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  const $ = id => document.getElementById(id);
+  // 계산된 문장의 조사: 앞말 마지막 한글 글자의 받침으로 고른다 (괄호 속 숫자는 건너뜀)
+  const jo = (word, withB, noB) => { const m = String(word).replace(/\([^)]*\)$/, "").match(/[가-힣]$/);
+    return word + (m && (m[0].charCodeAt(0) - 0xac00) % 28 ? withB : noB); };
   const total = P.length, amtTotal = G.reduce((s, g) => s + g.amount, 0);
   const yt = Object.fromEntries(M.year_totals);
   const yr = (o, y) => (o.years.find(x => x[0] === y) || [y, 0])[1];
+  const b = gById.build, e = gById.edu, p = gById.policy;
 
+  // 머리: 결론 한 문장 + 네 갈래 숫자
+  $("h1").textContent = `공공기관 AX 발주의 ${pct(b.count, total)}%는 시스템을 만들고 운영하는 일입니다`;
+  $("scope").textContent = `나라장터 AI 관련 용역 발주계획 ${fmt(total)}건(2024.01~2026.09)을 사업명의 의미로 10개 유형, 네 갈래로 나눴습니다.`;
+  $("kpis").innerHTML = G.map(g => `<div class="kpi"><dt><span class="sw" style="background:var(${GCOLOR[g.key]})"></span>${esc(g.label)}</dt>
+    <dd class="num">${pct(g.count, total)}%<small>${fmt(g.count)}건</small></dd></div>`).join("");
+
+  // 01 지형도
+  $("h-01").textContent = `구축 다음은 교육(${pct(e.count, total)}%)이고, 정책·전략은 ${pct(yr(p, "2024"), yt["2024"])}%에서 ${pct(yr(p, "2026"), yt["2026"])}%로 늘었습니다`;
   let selected = null, query = "";
-  const matchP = p => query && p[4].includes(query);
-
-  document.getElementById("scope").textContent =
-    `나라장터 AI 관련 용역 발주계획 ${fmt(total)}건(2024.01~2026.09)을 사업명의 의미로 10개 유형, 네 갈래로 나눴습니다.`;
-
-  // 한눈에 보기
-  (function () {
-    const b = gById.build, e = gById.edu, p = gById.policy;
-    document.getElementById("lead").textContent =
-      `공공기관의 AX 발주는 시스템을 만들고 운영하는 일이 ${pct(b.count, total)}%로 가장 많고, 금액으로는 ${pct(b.amount, amtTotal)}%를 차지합니다. 다음은 교육(${pct(e.count, total)}%), 정책·전략(${pct(p.count, total)}%) 순이며, 정책·전략 비중은 2024년 ${pct(yr(p, "2024"), yt["2024"])}%에서 2026년 ${pct(yr(p, "2026"), yt["2026"])}%로 늘었습니다.`;
-    const notes = {
-      build: `금액의 ${pct(b.amount, amtTotal)}%를 차지합니다.`,
-      edu: `연수, 교육 플랫폼, AI·SW 교육 프로그램입니다.`,
-      policy: `2024년 ${pct(yr(p, "2024"), yt["2024"])}% → 2026년 ${pct(yr(p, "2026"), yt["2026"])}%로 늘었습니다.`,
-      etc: `행사와, 이름에만 AI가 들어간 사업입니다.`,
-    };
-    document.getElementById("groups").innerHTML = G.map(g => `
-      <div class="group">
-        <div class="pct">${pct(g.count, total)}%</div>
-        <div class="gname"><span class="gsw" style="background:var(${GCOLOR[g.key]})"></span>${esc(g.label)}</div>
-        <p>${fmt(g.count)}건. ${notes[g.key]}</p>
-      </div>`).join("");
-  })();
-
-  // AX 지형도 (트리맵): 갈래 폭 = 건수, 갈래 안 칸 높이 = 건수
-  const tree = document.getElementById("tree");
+  const matchP = x => query && x[4].includes(query);
+  const tree = $("tree");
   tree.innerHTML = G.map(g => {
     const cells = C.filter(c => c.group === g.key).sort((a, b) => b.count - a.count);
     return `<div class="tgroup" style="flex:${g.count} 1 0">
-      <div class="tglabel"><span class="gsw" style="background:var(${GCOLOR[g.key]})"></span>${esc(g.label)} ${pct(g.count, total)}%</div>
+      <div class="tglabel">${esc(g.label)} ${pct(g.count, total)}%</div>
       <div class="tcells">${cells.map(c => `
-        <button type="button" class="tcell" data-id="${c.id}" aria-pressed="false" style="--gc:var(${GCOLOR[g.key]});flex:${c.count} 1 0">
+        <button type="button" class="tcell num" data-id="${c.id}" aria-pressed="false" style="--gc:var(${GCOLOR[g.key]});flex:${c.count} 1 0">
           <span class="nm">${esc(c.name)}</span>
           <span class="ct">${fmt(c.count)}건 · ${pct(c.count, total)}%</span>
           <span class="ex">예: ${esc(c.rep)}</span>
         </button>`).join("")}</div>
     </div>`;
   }).join("");
-  tree.querySelectorAll(".tcell").forEach(b => b.addEventListener("click", () => select(+b.dataset.id)));
+  tree.querySelectorAll(".tcell").forEach(el => el.addEventListener("click", () => select(+el.dataset.id)));
 
   function paintTree() {
     const hits = {};
-    if (query) P.forEach(p => { if (matchP(p)) hits[p[2]] = (hits[p[2]] || 0) + 1; });
-    tree.querySelectorAll(".tcell").forEach(b => {
-      const id = +b.dataset.id;
-      b.setAttribute("aria-pressed", String(id === selected));
-      b.querySelector(".hit")?.remove();
-      b.classList.toggle("dim", !!query && !hits[id]);
-      if (query && hits[id]) b.insertAdjacentHTML("beforeend", `<span class="hit">${fmt(hits[id])}</span>`);
+    if (query) P.forEach(x => { if (matchP(x)) hits[x[2]] = (hits[x[2]] || 0) + 1; });
+    tree.querySelectorAll(".tcell").forEach(el => {
+      const id = +el.dataset.id;
+      el.setAttribute("aria-pressed", String(id === selected));
+      el.querySelector(".hit")?.remove();
+      el.classList.toggle("dim", !!query && !hits[id]);
+      if (query && hits[id]) el.insertAdjacentHTML("beforeend", `<span class="hit">${fmt(hits[id])}</span>`);
     });
   }
 
-  // 오른쪽 상세
-  const EMPTY = `<div class="empty">
-      <h2>무엇이 보이나요?</h2>
-      왼쪽 지형도의 칸을 누르거나 기관을 검색해 보세요.
-      <div class="try">
-        <button type="button" class="chip" data-query="국민건강보험공단">국민건강보험공단</button>
-        <button type="button" class="chip" data-query="교육청">교육청 전체</button>
-        <button type="button" class="chip" data-query="서울특별시">서울특별시</button>
-        <button type="button" class="chip" data-cluster="8">AX 전략·컨설팅</button>
-      </div>
-    </div>`;
-
   function profileHtml() {
     const hits = P.filter(matchP);
-    if (!hits.length) return `<h3>기관명 검색 "${esc(query)}"</h3><p class="empty">결과가 없습니다. 기관명 일부만 넣어 보세요.</p>`;
-    const insts = new Set(hits.map(p => p[4]));
+    if (!hits.length) return `<p class="k">기관명 "${esc(query)}"</p><p class="empty">결과가 없습니다. 기관명 일부만 넣어 보세요.</p>`;
+    const insts = new Set(hits.map(x => x[4]));
     const label = insts.size === 1 ? esc([...insts][0]) : `"${esc(query)}" 포함 기관 ${fmt(insts.size)}곳`;
-    const top = [...hits].sort((a, b) => b[5] - a[5]).slice(0, 6);
-    return `<h3>${label}의 AX</h3>
-      <div class="big">${fmt(hits.length)}건 · ${eok(hits.reduce((s, p) => s + p[5], 0))}억 원</div>
-      ${G.map(g => { const n = hits.filter(p => groupOf[p[2]] === g.key).length;
-        return `<div class="bar"><span>${esc(g.label)}</span><span class="t" style="width:${(n / hits.length) * 100}%;background:var(${GCOLOR[g.key]})"></span><span class="v">${pct(n, hits.length)}%</span></div>`; }).join("")}
-      <p class="note">전체 평균: 시스템 구축·운영 ${pct(gById.build.count, total)}%, 교육 ${pct(gById.edu.count, total)}%, 정책·전략 ${pct(gById.policy.count, total)}%</p>
-      <h3>금액이 큰 사업</h3><ul>${top.map(p => `<li>${esc(p[3])} <span class="note">(${p[6]}, ${eok(p[5])}억)</span></li>`).join("")}</ul>`;
+    const top = [...hits].sort((a, b) => b[5] - a[5]).slice(0, 5);
+    return `<p class="k">${label}</p>
+      <div class="big num">${fmt(hits.length)}건 · ${eok(hits.reduce((s, x) => s + x[5], 0))}억 원</div>
+      ${G.map(g => { const n = hits.filter(x => groupOf[x[2]] === g.key).length;
+        return `<div class="gbar"><span>${esc(g.label)}</span><span class="t" style="width:${(n / hits.length) * 100}%;background:var(${GCOLOR[g.key]})"></span><span class="v num">${pct(n, hits.length)}%</span></div>`; }).join("")}
+      <p class="small muted">전체 평균은 구축 ${pct(b.count, total)}%, 교육 ${pct(e.count, total)}%, 정책·전략 ${pct(p.count, total)}%입니다.</p>
+      <p class="k">금액이 큰 사업</p><ul>${top.map(x => `<li>${esc(x[3])} <span class="muted num">(${x[6]}, ${eok(x[5])}억)</span></li>`).join("")}</ul>`;
   }
-
   function clusterHtml(c) {
-    const g = gById[c.group];
-    return `<h3>${esc(g.label)}</h3>
+    return `<p class="k">${esc(gById[c.group].label)}</p>
       <div class="big">${esc(c.name)}</div>
-      <p>${fmt(c.count)}건 · ${eok(c.amount)}억 원 · 전체의 ${pct(c.count, total)}%</p>
-      <h3>연도별 건수</h3><ul>${c.years.map(([y, n]) => `<li>${y}년${y === "2026" ? "(9월까지)" : ""} ${fmt(n)}건</li>`).join("")}</ul>
-      <h3>많이 발주한 기관</h3><ul>${c.top_insts.map(([n, k]) => `<li>${esc(n)} (${k}건)</li>`).join("")}</ul>
-      <h3>기관 유형</h3><ul>${c.kinds.map(([n, k]) => `<li>${esc(n)} ${pct(k, c.count)}%</li>`).join("")}</ul>
-      <h3>금액이 큰 사업</h3><ul>${c.examples.map(n => `<li>${esc(n)}</li>`).join("")}</ul>`;
+      <p class="num">${fmt(c.count)}건 · ${eok(c.amount)}억 원 · 전체의 ${pct(c.count, total)}%</p>
+      <p class="k">연도별 건수</p><p class="num">${c.years.map(([y, n]) => `${y}년${y === "2026" ? "(9월까지)" : ""} ${fmt(n)}`).join(" · ")}</p>
+      <p class="k">많이 발주한 기관</p><ul>${c.top_insts.map(([n, k]) => `<li>${esc(n)} <span class="muted num">${k}건</span></li>`).join("")}</ul>
+      <p class="k">금액이 큰 사업</p><ul>${c.examples.map(n => `<li>${esc(n)}</li>`).join("")}</ul>`;
   }
-
   function renderDetail() {
     const parts = [];
     if (query) parts.push(profileHtml());
     if (selected !== null) parts.push(clusterHtml(byId[selected]));
-    document.getElementById("detail").innerHTML = parts.length ? parts.join("<hr style='border:0;border-top:1px solid var(--line);margin:16px 0'>") : EMPTY;
+    $("detail").innerHTML = parts.length ? parts.join("<hr>") :
+      `<p class="k">유형 상세</p><p class="empty">칸을 누르면 이 자리에 그 유형의 연도별 건수, 많이 발주한 기관, 금액이 큰 사업이 나옵니다.</p>`;
   }
-
   function renderStatus() {
     const s = [];
-    if (selected !== null) s.push(`선택한 유형: ${esc(byId[selected].name)} ${fmt(byId[selected].count)}건`);
-    if (query) {
-      const n = P.filter(matchP).length;
-      s.push(n ? `칸 오른쪽 위 숫자 = "${esc(query)}" 검색 기관의 발주 건수 (모두 ${fmt(n)}건)` : `"${esc(query)}" 검색 결과가 없습니다.`);
-    }
-    document.getElementById("status").innerHTML = s.length ? s.join(" · ") : `칸을 누르거나 기관을 검색해 보세요.`;
+    if (selected !== null) s.push(`선택: ${esc(byId[selected].name)} ${fmt(byId[selected].count)}건`);
+    if (query) { const n = P.filter(matchP).length;
+      s.push(n ? `칸 오른쪽 위 숫자는 "${esc(query)}" 기관의 건수입니다 (모두 ${fmt(n)}건)` : `"${esc(query)}" 검색 결과가 없습니다.`); }
+    $("status").innerHTML = s.join(" · ");
   }
-
   function refresh() { paintTree(); renderDetail(); renderStatus(); drawMap(); }
   function select(id, keep) { selected = (selected === id && !keep) ? null : id; refresh(); }
 
-  // 검색
-  const qInput = document.getElementById("q");
-  document.getElementById("insts").innerHTML = [...new Set(P.map(p => p[4]))].sort().map(n => `<option value="${esc(n)}">`).join("");
+  const qInput = $("q");
+  $("insts").innerHTML = [...new Set(P.map(x => x[4]))].sort().map(n => `<option value="${esc(n)}">`).join("");
   function setQuery(v) { query = v.trim(); qInput.value = v; refresh(); }
-  qInput.addEventListener("input", e => setQuery(e.target.value));
-  document.getElementById("reset").addEventListener("click", () => { selected = null; setQuery(""); });
-  document.addEventListener("click", e => {
-    const chip = e.target.closest(".chip");
+  qInput.addEventListener("input", ev => setQuery(ev.target.value));
+  $("reset").addEventListener("click", () => { selected = null; setQuery(""); });
+  document.addEventListener("click", ev => {
+    const chip = ev.target.closest(".chip");
     if (!chip) return;
     if (chip.dataset.query) setQuery(chip.dataset.query);
     if (chip.dataset.cluster) select(+chip.dataset.cluster, true);
-    if (matchMedia("(max-width: 860px)").matches) tree.scrollIntoView({ behavior: "smooth", block: "start" });
   });
 
-  // 시점 × 금액 지도: 가로 = 발주 예정 월, 세로 = 금액(로그). 좌표가 실제 값이다
-  const canvas = document.getElementById("map"), ctx = canvas.getContext("2d");
-  const monthIdx = p => (+p[6] - 2024) * 12 + (p[8] - 1);           // 2024-01 = 0
+  // 시점 × 금액 (접어 둠): 가로 = 발주 예정 월, 세로 = 금액(로그)
+  const canvas = $("map"), ctx = canvas.getContext("2d");
+  const monthIdx = x => (+x[6] - 2024) * 12 + (x[8] - 1);
   const MONTHS = Math.max(...P.map(monthIdx)) + 1;
-  const YMIN = 6, YMAX = 11;                                           // 10^6(100만) ~ 10^11(1,000억) 원
-  const FLOOR = 5.6;                                                   // 100만 원 미만·미기재 줄
-  const jitter = i => ((Math.sin(i * 12.9898) * 43758.5453) % 1 + 1) % 1; // 같은 달 안에서 점이 겹치지 않게 고정된 흩뿌림
+  const YMIN = 6, YMAX = 11, FLOOR = 5.6;
+  const jitter = i => ((Math.sin(i * 12.9898) * 43758.5453) % 1 + 1) % 1;
   const MG = { l: 84, r: 10, t: 10, b: 40 };
   let W = 0, H = 0, screen = [];
-  const lowCount = P.filter(p => p[5] < 1e6).length;
-  document.getElementById("mapNote").textContent =
-    `금액이 100만 원 미만이거나 비어 있는 ${fmt(lowCount)}건은 맨 아래 줄에 모았습니다. 2026년은 9월까지입니다.`;
-  function yOf(v) { return v < 1e6 ? FLOOR : Math.min(Math.log10(v), YMAX); }
+  $("mapNote").textContent = `점 하나가 사업 한 건입니다. 가로는 발주 예정 월, 세로는 금액(눈금 한 칸마다 10배)입니다. 위에서 고른 유형과 검색한 기관이 함께 표시됩니다. 100만 원 미만이거나 비어 있는 ${fmt(P.filter(x => x[5] < 1e6).length)}건은 맨 아래 줄에 모았습니다.`;
+  const yOf = v => v < 1e6 ? FLOOR : Math.min(Math.log10(v), YMAX);
   function sizeMap() {
     const r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
-    W = r.width; H = r.height; canvas.width = W * dpr; canvas.height = H * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    W = r.width; H = r.height; if (!W) return;
+    canvas.width = W * dpr; canvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const pw = W - MG.l - MG.r, ph = H - MG.t - MG.b;
-    screen = P.map((p, i) => [
-      MG.l + ((monthIdx(p) + 0.1 + jitter(i) * 0.8) / MONTHS) * pw,
-      MG.t + (1 - (yOf(p[5]) - FLOOR) / (YMAX - FLOOR)) * ph,
-    ]);
+    screen = P.map((x, i) => [MG.l + ((monthIdx(x) + 0.1 + jitter(i) * 0.8) / MONTHS) * pw, MG.t + (1 - (yOf(x[5]) - FLOOR) / (YMAX - FLOOR)) * ph]);
   }
   function drawAxes() {
-    const pw = W - MG.l - MG.r, ph = H - MG.t - MG.b, line = css("--line"), muted = css("--text-muted");
+    const pw = W - MG.l - MG.r, ph = H - MG.t - MG.b;
     const yPx = v => MG.t + (1 - (v - FLOOR) / (YMAX - FLOOR)) * ph;
-    ctx.font = "12px Noto Sans KR, sans-serif"; ctx.fillStyle = muted; ctx.strokeStyle = line; ctx.lineWidth = 1;
+    ctx.font = "13px Pretendard, sans-serif"; ctx.fillStyle = css("--muted"); ctx.strokeStyle = css("--line"); ctx.lineWidth = 1;
     const ylab = { 6: "100만", 7: "1,000만", 8: "1억", 9: "10억", 10: "100억", 11: "1,000억" };
     ctx.textAlign = "right"; ctx.textBaseline = "middle";
-    for (let e = YMIN; e <= YMAX; e++) {
-      ctx.beginPath(); ctx.moveTo(MG.l, yPx(e)); ctx.lineTo(W - MG.r, yPx(e)); ctx.stroke();
-      ctx.fillText(ylab[e], MG.l - 6, yPx(e));
-    }
+    for (let k = YMIN; k <= YMAX; k++) { ctx.beginPath(); ctx.moveTo(MG.l, yPx(k)); ctx.lineTo(W - MG.r, yPx(k)); ctx.stroke(); ctx.fillText(ylab[k], MG.l - 6, yPx(k)); }
     ctx.fillText("미만·미기재", MG.l - 6, yPx(FLOOR));
     ctx.textAlign = "left"; ctx.textBaseline = "top";
     for (let m = 0; m < MONTHS; m++) {
       const x = MG.l + (m / MONTHS) * pw;
-      if (m % 12 === 0) {
-        ctx.beginPath(); ctx.moveTo(x, MG.t); ctx.lineTo(x, H - MG.b); ctx.stroke();
-        ctx.fillText(`${2024 + m / 12}년`, x + 4, H - MG.b + 6);
-      } else if (m % 12 === 6) {
-        ctx.fillText("7월", x + 2, H - MG.b + 22);
-      }
+      if (m % 12 === 0) { ctx.beginPath(); ctx.moveTo(x, MG.t); ctx.lineTo(x, H - MG.b); ctx.stroke(); ctx.fillText(`${2024 + m / 12}년`, x + 4, H - MG.b + 6); }
+      else if (m % 12 === 6) ctx.fillText("7월", x + 2, H - MG.b + 22);
     }
   }
   function drawMap() {
-    document.getElementById("key").innerHTML = G.map(g => `<span><span class="gsw" style="background:var(${GCOLOR[g.key]})"></span>${esc(g.label)}</span>`).join("") +
-      (query ? `<span>○ 검색한 기관</span>` : "");
+    $("key").innerHTML = G.map(g => `<span><i class="sw" style="background:var(${GCOLOR[g.key]})"></i>${esc(g.label)}</span>`).join("") + (query ? `<span>○ 검색한 기관</span>` : "");
     if (!W) return;
-    ctx.clearRect(0, 0, W, H);
-    drawAxes();
-    const col = Object.fromEntries(Object.entries(GCOLOR).map(([k, v]) => [k, css(v)])), ink = css("--text-primary");
-    const focus = selected !== null || query;
-    P.forEach((p, i) => {
-      const on = selected !== null && p[2] === selected;
-      ctx.globalAlpha = focus && !on ? 0.12 : 0.75;
-      ctx.fillStyle = col[groupOf[p[2]]];
-      const r = on ? 2.5 : 1.6;
-      ctx.fillRect(screen[i][0] - r, screen[i][1] - r, r * 2, r * 2);
+    ctx.clearRect(0, 0, W, H); drawAxes();
+    const col = Object.fromEntries(Object.entries(GCOLOR).map(([k, v]) => [k, css(v)])), focus = selected !== null || query;
+    P.forEach((x, i) => {
+      const on = selected !== null && x[2] === selected;
+      ctx.globalAlpha = focus && !on ? 0.12 : 0.75; ctx.fillStyle = col[groupOf[x[2]]];
+      const r = on ? 2.5 : 1.6; ctx.fillRect(screen[i][0] - r, screen[i][1] - r, r * 2, r * 2);
     });
     ctx.globalAlpha = 1;
-    if (query) P.forEach((p, i) => {
-      if (!matchP(p)) return;
-      ctx.beginPath(); ctx.arc(screen[i][0], screen[i][1], 5, 0, Math.PI * 2);
-      ctx.lineWidth = 2; ctx.strokeStyle = ink; ctx.stroke();
-    });
+    if (query) P.forEach((x, i) => { if (!matchP(x)) return;
+      ctx.beginPath(); ctx.arc(screen[i][0], screen[i][1], 5, 0, Math.PI * 2); ctx.lineWidth = 2; ctx.strokeStyle = css("--ink"); ctx.stroke(); });
   }
+  $("mapMore").addEventListener("toggle", () => { sizeMap(); drawMap(); });
   window.addEventListener("resize", () => { sizeMap(); drawMap(); });
-  const tip = document.getElementById("tip");
-  function nearest(e, max) {
-    const r = canvas.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+  const tip = $("tip");
+  function nearest(ev, max) {
+    const r = canvas.getBoundingClientRect(), mx = ev.clientX - r.left, my = ev.clientY - r.top;
     let best = -1, bd = max * max;
     screen.forEach((s, i) => { const d = (s[0] - mx) ** 2 + (s[1] - my) ** 2; if (d < bd) { bd = d; best = i; } });
     return best;
   }
-  function showTip(i, e) {
-    const p = P[i];
-    tip.innerHTML = `<b>${esc(p[3])}</b><br>${esc(p[4])} · ${p[6]}년 ${p[8]}월 · ${eok(p[5])}억 원<br>${esc(byId[p[2]].name)}`;
-    tip.style.left = Math.max(8, Math.min(e.clientX + 12, window.innerWidth - 330)) + "px";
-    tip.style.top = (e.clientY + 12) + "px"; tip.style.opacity = 1;
+  function showTip(i, ev) {
+    const x = P[i];
+    tip.innerHTML = `<b>${esc(x[3])}</b><br>${esc(x[4])} · ${x[6]}년 ${x[8]}월 · ${eok(x[5])}억 원<br>${esc(byId[x[2]].name)}`;
+    tip.style.left = Math.max(8, Math.min(ev.clientX + 12, window.innerWidth - 330)) + "px"; tip.style.top = (ev.clientY + 12) + "px"; tip.style.opacity = 1;
   }
-  canvas.addEventListener("mousemove", e => { const i = nearest(e, 8); if (i < 0) tip.style.opacity = 0; else showTip(i, e); });
+  canvas.addEventListener("mousemove", ev => { const i = nearest(ev, 8); if (i < 0) tip.style.opacity = 0; else showTip(i, ev); });
   canvas.addEventListener("mouseleave", () => { tip.style.opacity = 0; });
-  canvas.addEventListener("click", e => {
-    const i = nearest(e, 14); if (i < 0) return;
-    showTip(i, e); setTimeout(() => { tip.style.opacity = 0; }, 3500);
-    select(P[i][2], true);
-  });
+  canvas.addEventListener("click", ev => { const i = nearest(ev, 14); if (i < 0) return; showTip(i, ev); setTimeout(() => { tip.style.opacity = 0; }, 3500); select(P[i][2], true); });
 
-  // 지도 읽기
-  (function () {
-    const items = [];
-    const b = gById.build, p = gById.policy;
-    items.push(`<b>공공 AX의 중심은 시스템 구축·운영입니다.</b> 건수의 ${pct(b.count, total)}%, 금액의 ${pct(b.amount, amtTotal)}%입니다. 콜봇·업무 AI 서비스, 관제·분석 시스템, AI 인프라·플랫폼이 여기에 속합니다.`);
-    const ax = C.find(c => c.name.startsWith("AX"));
-    if (ax) items.push(`<b>전략을 먼저 세우려는 움직임이 늘고 있습니다.</b> AX 전략·컨설팅은 2024년 ${yr(ax, "2024")}건에서 2026년(9월까지) ${yr(ax, "2026")}건으로 늘었고, 정책·전략 갈래 비중도 ${pct(yr(p, "2024"), yt["2024"])}%에서 ${pct(yr(p, "2026"), yt["2026"])}%로 커졌습니다.`);
-    const edu = gById.edu;
-    items.push(`<b>교육은 세 사업 중 하나꼴입니다.</b> ${fmt(edu.count)}건(${pct(edu.count, total)}%)으로, 교원 연수, 교육 플랫폼·콘텐츠, AI·SW 교육 프로그램으로 나뉩니다.`);
-    // 시점 × 금액 지도에서 읽히는 것
-    const mid = P.filter(p => p[5] >= 1e7 && p[5] < 1e9).length, big = P.filter(p => p[5] >= 1e10).length;
-    items.push(`<b>2026년에 점이 빽빽해집니다.</b> 2024년 ${fmt(yt["2024"])}건이던 발주계획이 2026년에는 9월까지만 ${fmt(yt["2026"])}건입니다. 금액은 대부분 1천만~10억 원 사이(${pct(mid, total)}%)이고, 100억 원이 넘는 사업은 ${fmt(big)}건입니다.`);
-    const noise = C.find(c => c.name.startsWith("이름만"));
-    if (noise) items.push(`<b>수집의 한계도 보입니다.</b> ${fmt(noise.count)}건은 "인공지능과학관 청소·시설관리"처럼 이름에만 AI가 들어간 사업입니다. 키워드 수집으로는 걸러지지 않았습니다.`);
-    document.getElementById("reading").innerHTML = items.map(t => `<li>${t}</li>`).join("");
-  })();
+  // 02 떠오르는 표현 (데이터: v3-data.js, scripts/explore_v3.py)
+  const spark = arr => { const w = 96, h = 24, pd = 3, max = Math.max(...arr, .1);
+    const pts = arr.map((v, i) => [pd + i / (arr.length - 1) * (w - 2 * pd), h - pd - v / max * (h - 2 * pd)]);
+    return `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="분기별 등장 비율"><polyline fill="none" stroke="var(--brand)" stroke-width="1.6" points="${pts.map(q => q.join(",")).join(" ")}"/><circle cx="${pts.at(-1)[0]}" cy="${pts.at(-1)[1]}" r="2.5" fill="var(--brand)"/></svg>`; };
+  const PH = V.phrases.rising.slice(0, 8), maxP = Math.max(...PH.map(x => x.new)), top = PH[0];
+  $("h-02").textContent = `가장 크게 떠오른 표현은 "${top.phrase}"입니다`;
+  $("phrases").innerHTML = PH.map(x => `
+    <div class="prow"><div class="nm">${esc(x.phrase)}</div>
+      <div class="track" title="2024 ${x.old.toFixed(1)}% → 2026 ${x.new.toFixed(1)}%"><span style="width:${x.new / maxP * 100}%"></span></div>
+      <div class="v num">${x.old.toFixed(1)}% → <b>${x.new.toFixed(1)}%</b> · ${fmt(x.count)}건</div>
+      <div class="ex">예: ${esc(x.examples[0] || "")}</div></div>`).join("");
+  const R = V.words.rising.filter(w => !(w.word === "Agent" && V.words.rising.some(x => x.word === "에이전트"))).slice(0, 10);
+  $("words").innerHTML = `<div class="wrow head"><span>단어</span><span>2024 → 2026 · 건수</span><span>분기 추이</span><span>함께 쓰인 말 (건수)</span></div>` +
+    R.map(w => `<div class="wrow"><div class="w">${esc(w.word)}</div>
+      <div class="d num">${w.old.toFixed(1)}% → <b>${w.new.toFixed(1)}%</b> · ${fmt(w.count)}건</div>
+      ${spark(w.series)}
+      <div class="tags">${w.with.length ? w.with.map(([k, n]) => `<span>${esc(k)} ${n}</span>`).join("") : `<span class="none">뚜렷한 조합 없음</span>`}</div></div>`).join("");
+  $("fall").innerHTML = V.phrases.falling.map(x => `${esc(x.phrase)} <span class="muted num">${x.old.toFixed(1)}% → ${x.new.toFixed(1)}%</span>`).join(" · ");
+  const ax = V.words.rising.find(w => w.word === "AX"), task = V.words.rising.find(w => w.word === "과제");
+  const withJo = w => jo(w.with.slice(0, 3).map(([k]) => esc(k)).join("·"), "과", "와");
+  $("f1").innerHTML = `"${esc(top.phrase)}"${jo(top.phrase, "은", "는").slice(top.phrase.length)} 2024년 사업명의 ${top.old.toFixed(1)}%에서 2026년 ${top.new.toFixed(1)}%로 늘었습니다.` +
+    (ax ? ` "AX"는 ${ax.old.toFixed(1)}% → ${ax.new.toFixed(1)}%로 퍼졌고, ${withJo(ax)} 함께 쓰여 반도체·디바이스 AX라는 흐름이 따로 보입니다.` : "") +
+    (task ? ` 혼자서는 뜻이 약한 "과제"는 ${withJo(task)} 함께 쓰여 주로 과제 발굴 사업을 가리킵니다.` : "");
+
+  // 03 구축 세부
+  const S = [...V.subs].sort((a, c) => Math.abs(c.share[2] - c.share[0]) - Math.abs(a.share[2] - a.share[0]));
+  const mx = Math.max(...S.flatMap(s => [s.share[0], s.share[2]]));
+  const ds = V.subs.map(s => [s.name, s.share[2] - s.share[0], s.share]).sort((a, c) => c[1] - a[1]);
+  const ups = ds.filter(x => x[1] > 0).slice(0, 4), dns = ds.filter(x => x[1] < 0).slice(-4).reverse();
+  $("h-03").textContent = `구축 안에서는 ${jo(ups[0][0], "과", "와")} ${ups[1][0]}의 비중이 가장 크게 늘었습니다`;
+  $("f2").innerHTML = `시스템 구축·운영 ${fmt(V.build_total)}건을 10개 세부로 나눠 2024년과 2026년의 비중을 비교했습니다. ${jo(ups.map(x => esc(x[0])).join(", "), "이", "가")} 커지고 ${jo(dns.map(x => esc(x[0])).join(", "), "은", "는")} 줄었습니다. 개별 예측 모델·시설·단일 서비스를 하나씩 짓던 데서 실증·공통 플랫폼·업무 시스템·생성형 AI로 무게가 옮겨 가고 있습니다.`;
+  $("srows").innerHTML = S.map(s => { const d = s.share[2] - s.share[0], up = d >= 0;
+    return `<div class="srow"><div class="nm">${esc(s.name)}</div>
+      <div class="bars"><div class="b old" style="width:${s.share[0] / mx * 100}%" title="2024 ${s.share[0]}%"></div><div class="b" style="width:${s.share[2] / mx * 100}%;background:var(${up ? "--brand" : "--down"})" title="2026 ${s.share[2]}%"></div></div>
+      <div class="d num"><b style="color:var(${up ? "--brand" : "--body"})">${up ? "+" : "−"}${Math.abs(d).toFixed(1)}%p</b><small>${s.share[0]}% → ${s.share[2]}%</small></div></div>`; }).join("");
+  $("subTable").innerHTML = `<table><thead><tr><th>세부</th><th class="n">건수</th><th class="n">금액(억 원)</th><th>많이 낸 기관</th><th>이 세부에 특히 많은 표현</th></tr></thead><tbody>` +
+    V.subs.map(s => `<tr><td>${esc(s.name)}</td><td class="n num">${fmt(s.count)}</td><td class="n num">${fmt(s.amount / 1e8)}</td><td>${s.insts.slice(0, 2).map(([n, k]) => `${esc(n)} ${k}`).join("<br>")}</td><td>${s.phrases.slice(0, 3).map(([w, n]) => `${esc(w)} ${n}`).join("<br>")}</td></tr>`).join("") + `</tbody></table>`;
+
+  // 04 지역
+  const RG = V.region, SEQ = ["--seq-0", "--seq-1", "--seq-2", "--seq-3", "--seq-4", "--seq-5", "--seq-6", "--seq-7"];
+  const order = [...V.regions].sort((a, c) => RG[c].groups[0] / RG[c].n - RG[a].groups[0] / RG[a].n);
+  const pc = (k, gi) => Math.round(RG[k].groups[gi] / RG[k].n * 100);
+  $("h-04").textContent = `구축 비중은 ${jo(`${order[0]}(${pc(order[0], 0)}%)`, "이", "가")} 가장 높고 ${jo(`${order.at(-1)}(${pc(order.at(-1), 0)}%)`, "이", "가")} 가장 낮습니다`;
+  $("regKey").innerHTML = G.map((g, gi) => `<span><i class="sw" style="background:var(${GV[gi]})"></i>${esc(g.label)}</span>`).join("");
+  $("regBar").innerHTML = order.map(k => { const v = RG[k];
+    return `<div class="regbar"><span>${k} <span class="muted small num">${v.n}</span></span><div class="st">${v.groups.map((n, gi) => n ? `<span style="flex:${n};background:var(${GV[gi]})" title="${k} ${esc(G[gi].label)} ${Math.round(n / v.n * 100)}%"></span>` : "").join("")}</div></div>`; }).join("");
+  const subs = V.sub_names, cuts = [0, 5, 10, 15, 20, 25, 30, 40], notable = [];
+  let h = `<table class="heat"><thead><tr><th></th>${subs.map(n => `<th class="col">${esc(n)}</th>`).join("")}</tr></thead><tbody>`;
+  order.filter(k => RG[k].groups[0] >= 10).forEach(k => { const bs = RG[k].build_subs, tot = bs.reduce((a, c) => a + c, 0);
+    h += `<tr><th class="row">${k} <span class="muted small num">${tot}</span></th>` + bs.map((n, i) => { const q = tot ? Math.round(n / tot * 100) : 0, si = cuts.filter(c => q >= c).length - 1;
+      if (q >= 30 && n >= 5) notable.push([k, subs[i], q, n]);
+      return `<td class="c num" title="${k} · ${esc(subs[i])} ${n}건" style="background:var(${SEQ[si]});color:${si >= 5 ? "#fff" : "inherit"}">${q || ""}</td>`; }).join("") + `</tr>`; });
+  $("regHeat").innerHTML = h + `</tbody></table>`;
+  notable.sort((a, c) => c[2] - a[2]);
+  $("f3").innerHTML = `구축 비중은 ${order.slice(0, 3).map(k => `${k} ${pc(k, 0)}%`).join(", ")} 순으로 높고, ${order.slice(-2).map(k => `${k} ${pc(k, 0)}%`).join(", ")}는 낮습니다. 구축 안에서 한 세부가 30% 이상인 지역은 ${jo(notable.slice(0, 5).map(x => `${x[0]}의 ${esc(x[1])}(${x[2]}%)`).join(", "), "으로", "로")}, 지역마다 짓는 AI가 다릅니다.`;
+
+  // 방법과 한계: 흩어져 있던 "방법" 설명을 한곳에 모은다
+  const noise = C.find(c => c.name.startsWith("이름만"));
+  const M_ = [
+    ["데이터", `조달청 나라장터 발주계획현황서비스(용역, data.go.kr 15129462), 2024.01~2026.09, 중복 정리 후 ${fmt(total)}건. 공용 프록시(k-skill-proxy)로 조회했고 2026-10-29에 수집했습니다. 2026년은 9월까지입니다.`],
+    ["유형과 갈래", "사업명에서 연도·(긴급) 같은 꼬리표를 떼고 qwen/qwen3-embedding-8b로 임베딩(4,096차원)한 뒤 K-means로 10개 유형을 만들고 네 갈래로 묶었습니다(시드 42). 유형 이름은 군집 중심에 가까운 사업명을 읽고 붙였습니다."],
+    ["떠오르는 표현", "사업명의 이웃한 두 단어 조합과 단어의 등장 비율을 2024년과 2026년으로 비교한 로그 오즈비 순위입니다. 함께 쓰인 말은 그 단어가 든 사업명에 전체 평균보다 1.5배 이상 자주 나온 말입니다."],
+    ["구축 세부", "시스템 구축·운영 사업만 따로 K-means 10개로 나눴습니다. 비중은 그해 구축 사업 전체에서 그 세부가 차지하는 몫입니다."],
+    ["지역", `기관명에서 시·도를 뽑을 수 있는 ${fmt(V.region_coverage)}건(${pct(V.region_coverage, V.total)}%)만 썼고, 세부 비중 표는 구축 사업이 10건 이상인 지역만 넣었습니다. 지역별 건수가 작아 한두 사업에 비중이 크게 흔들립니다.`],
+    ["한계", `유형은 사업명만으로 나눈 것이라 경계가 흐릿합니다. 라벨은 칸막이가 아니라 경향이고, 확인은 원문 공고로 합니다.${noise ? ` ${fmt(noise.count)}건은 이름에만 AI가 들어간 사업으로, 키워드 수집으로는 걸러지지 않았습니다.` : ""}`],
+  ];
+  $("method").innerHTML = M_.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
 
   sizeMap();
   refresh();
-})();
-</script>
-<script>
-// 떠오르는 말 · 구축 세부 · 지역 (데이터: v3-data.js, scripts/explore_v3.py)
-(function () {
-  const V = window.V3;
-  const fmt = n => Math.round(n).toLocaleString("ko-KR"), eok = n => fmt(n / 1e8);
-  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-  const SEQ = ["--seq-0", "--seq-1", "--seq-2", "--seq-3", "--seq-4", "--seq-5", "--seq-6", "--seq-7"];
-  const spark = arr => { const W = 200, H = 40, P = 4, max = Math.max(...arr, .1);
-    const pts = arr.map((v, i) => [P + i / (arr.length - 1) * (W - 2 * P), H - P - v / max * (H - 2 * P)]);
-    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="분기별 등장 비율"><polyline fill="none" stroke="var(--up)" stroke-width="2" points="${pts.map(p => p.join(",")).join(" ")}"/><circle cx="${pts.at(-1)[0]}" cy="${pts.at(-1)[1]}" r="3" fill="var(--up)"/></svg>`; };
-
-  // 떠오르는 말
-  const PH = V.phrases.rising, maxP = Math.max(...PH.map(p => p.new));
-  document.getElementById("phrases").innerHTML = PH.map(p => `
-    <div class="prow"><div class="nm">${esc(p.phrase)}</div>
-      <div class="bar" title="2024 ${p.old.toFixed(1)}% → 2026 ${p.new.toFixed(1)}%"><span style="width:${p.new / maxP * 100}%"></span></div>
-      <div class="v">${p.old.toFixed(1)}% → <b>${p.new.toFixed(1)}%</b> · ${fmt(p.count)}건</div>
-      <div class="ex">예: ${esc(p.examples[0] || "")}</div></div>`).join("");
-  const R = V.words.rising.filter(w => !(w.word === "Agent" && V.words.rising.some(x => x.word === "에이전트")));
-  document.getElementById("words").innerHTML = R.slice(0, 12).map(w => `
-    <div class="wcard">
-      <div class="w">${esc(w.word)}</div>
-      <div class="d">${w.old.toFixed(1)}% → <b>${w.new.toFixed(1)}%</b> · ${fmt(w.count)}건 · 기관 ${fmt(w.insts)}곳</div>
-      ${spark(w.series)}
-      <div class="lbl">함께 쓰인 말</div>
-      <div class="with">${(w.with.length ? w.with : [["뚜렷한 조합 없음", ""]]).map(([k, n]) => `<span>${esc(k)}${n ? " " + n : ""}</span>`).join("")}</div>
-      <div class="ex">예: ${esc(w.examples[0] || "")}</div>
-    </div>`).join("");
-  document.getElementById("fall").innerHTML = V.phrases.falling.map(p => `<span>${esc(p.phrase)} ${p.old.toFixed(1)}% → <b>${p.new.toFixed(1)}%</b></span>`).join("");
-  const ax = R.find(w => w.word === "AX"), top = PH[0], task = R.find(w => w.word === "과제");
-  document.getElementById("f1").innerHTML = `<b>발견:</b> 가장 크게 떠오른 표현은 <b>"${esc(top.phrase)}"</b>(${top.old.toFixed(1)}% → ${top.new.toFixed(1)}%, ${top.count}건)입니다. "AX"는 사업명의 ${ax.old.toFixed(1)}% → ${ax.new.toFixed(1)}%로 퍼졌는데, ${ax.with.slice(0, 3).map(([k, n]) => `${esc(k)}(${n})`).join(", ")} 같은 말과 함께 쓰여 반도체·디바이스 AX라는 흐름이 따로 보입니다.${task ? ` 혼자서는 뜻이 약한 "과제"도 함께 쓰인 말(${task.with.slice(0, 3).map(([k]) => esc(k)).join(", ")})을 보면 과제 발굴·공모 사업입니다.` : ""} 사라진 표현은 ${V.phrases.falling.slice(0, 3).map(p => `"${esc(p.phrase)}"`).join(", ")} 등입니다.`;
-
-  // 구축 세부
-  const S = [...V.subs].sort((a, b) => Math.abs(b.share[2] - b.share[0]) - Math.abs(a.share[2] - a.share[0]));
-  const mx = Math.max(...S.flatMap(s => [s.share[0], s.share[2]]));
-  document.getElementById("srows").innerHTML = S.map(s => { const d = s.share[2] - s.share[0], up = d >= 0;
-    return `<div class="srow"><div>${esc(s.name)}</div>
-      <div class="bars"><div class="b old" style="width:${s.share[0] / mx * 100}%" title="2024 ${s.share[0]}%"></div><div class="b" style="width:${s.share[2] / mx * 100}%;background:var(${up ? "--up" : "--down"})" title="2026 ${s.share[2]}%"></div></div>
-      <div class="d"><b style="color:var(${up ? "--up" : "--down"})">${up ? "+" : ""}${d.toFixed(1)}%p</b><small>${s.share[0]}% → ${s.share[2]}%</small></div></div>`; }).join("");
-  document.getElementById("subTable").innerHTML = `<table><tr><th>세부</th><th class="n">건수</th><th class="n">금액(억 원)</th><th>많이 낸 기관</th><th>이 세부에 특히 많은 표현</th></tr>` +
-    V.subs.map(s => `<tr><td>${esc(s.name)}</td><td class="n">${fmt(s.count)}</td><td class="n">${eok(s.amount)}</td><td>${s.insts.slice(0, 2).map(([n, k]) => `${esc(n)} ${k}`).join("<br>")}</td><td>${s.phrases.slice(0, 3).map(([w, n]) => `${esc(w)} ${n}`).join("<br>")}</td></tr>`).join("") + `</table>`;
-  const ds = V.subs.map(s => [s.name, s.share[2] - s.share[0], s.share]).sort((a, b) => b[1] - a[1]);
-  const ups = ds.filter(x => x[1] > 0).slice(0, 4), dns = ds.filter(x => x[1] < 0).slice(-4).reverse();
-  document.getElementById("f2").innerHTML = `<b>발견:</b> 구축 안에서 ${ups.map(x => `${esc(x[0])}(${x[2][0]}% → ${x[2][2]}%)`).join(", ")}가 커졌고, ${dns.map(x => `${esc(x[0])}(${x[2][0]}% → ${x[2][2]}%)`).join(", ")}는 줄었습니다. <b>개별 예측 모델·시설·단일 서비스를 하나씩 짓던 데서, 실증·공통 플랫폼·업무 시스템·생성형 AI로 무게가 옮겨 가고 있습니다.</b>`;
-
-  // 지역
-  const RG = V.region, GV = ["--series-1", "--series-2", "--series-3", "--g-etc"];
-  const order = [...V.regions].sort((a, b) => RG[b].groups[0] / RG[b].n - RG[a].groups[0] / RG[a].n);
-  document.getElementById("regBar").innerHTML = order.map(k => { const v = RG[k];
-    return `<div class="regbar"><span>${k} <span class="note">(${v.n})</span></span><div class="st">${v.groups.map((n, gi) => n ? `<span style="flex:${n};background:var(${GV[gi]})" title="${k} ${Math.round(n / v.n * 100)}%"></span>` : "").join("")}</div></div>`; }).join("");
-  const subs = V.sub_names, cuts = [0, 5, 10, 15, 20, 25, 30, 40], notable = [];
-  const heatRegs = order.filter(k => RG[k].groups[0] >= 10);
-  let h = `<table class="heat"><tr><th></th>${subs.map(n => `<th class="col">${esc(n)}</th>`).join("")}</tr>`;
-  heatRegs.forEach(k => { const b = RG[k].build_subs, tot = b.reduce((a, c) => a + c, 0);
-    h += `<tr><th class="row">${k} <span class="note">(${tot})</span></th>` + b.map((n, i) => { const p = tot ? Math.round(n / tot * 100) : 0, si = cuts.filter(c => p >= c).length - 1;
-      if (p >= 30 && n >= 5) notable.push([k, subs[i], p, n]);
-      return `<td class="c" title="${k} · ${subs[i]} ${n}건" style="background:var(${SEQ[si]});color:${si >= 5 ? "#fff" : "inherit"}">${p || ""}</td>`; }).join("") + `</tr>`; });
-  document.getElementById("regHeat").innerHTML = h + `</table>`;
-  notable.sort((a, b) => b[2] - a[2]);
-  const pc = (k, gi) => Math.round(RG[k].groups[gi] / RG[k].n * 100);
-  document.getElementById("f3").innerHTML = `<b>발견:</b> 구축 비중은 ${order.slice(0, 3).map(k => `${k} ${pc(k, 0)}%`).join(", ")} 순으로 높고, ${order.slice(-2).map(k => `${k} ${pc(k, 0)}%`).join(", ")}는 낮습니다. 구축 안에서 한 세부가 30% 이상인 지역은 ${notable.slice(0, 5).map(x => `${x[0]}의 ${esc(x[1])}(${x[2]}%, ${x[3]}건)`).join(", ")}입니다. <b>지역마다 짓는 AI가 다릅니다.</b>`;
-  document.getElementById("l3").textContent = `한계: 기관명에서 시·도를 뽑을 수 있는 건은 ${fmt(V.region_coverage)}건(전체의 ${Math.round(V.region_coverage / V.total * 100)}%)이고, 아래 표는 구축 사업이 10건 이상인 지역만 넣었습니다. 지역별 건수가 작아 한두 사업에 비중이 크게 흔들립니다.`;
 })();
 </script>
 </body>
