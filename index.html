@@ -142,9 +142,6 @@
   details.more[open] > summary::before { content: "−"; }
   .canvas-box { position: relative; width: 100%; aspect-ratio: 16 / 8; }
   canvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
-  .method { font-size: 14px; }
-  .method dt { font-weight: 700; color: var(--ink); margin-top: 12px; }
-  .method dd { margin: 2px 0 0; }
 
   #tip { position: fixed; pointer-events: none; background: var(--ink); color: #fff; font-size: 13px; padding: 6px 9px; border-radius: 3px; opacity: 0; max-width: 320px; z-index: 10; }
   footer { margin-top: 40px; padding-top: 14px; border-top: 2px solid var(--brand); font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 16px; }
@@ -238,11 +235,6 @@
     <h3>지역의 구축 사업 안에서 세부 비중(%)</h3>
     <div class="tbl" id="regHeat"></div>
   </section>
-
-  <details class="more" style="margin-top:40px">
-    <summary>방법과 한계</summary>
-    <dl class="method" id="method"></dl>
-  </details>
 
   <footer>
     <span>데이터: 조달청 나라장터 발주계획현황서비스(data.go.kr 15129462), 2026-10-29 수집</span>
@@ -484,18 +476,6 @@
   $("regHeat").innerHTML = h + `</tbody></table>`;
   notable.sort((a, c) => c[2] - a[2]);
   $("f3").innerHTML = `구축 비중은 ${order.slice(0, 3).map(k => `${k} ${pc(k, 0)}%`).join(", ")} 순으로 높고, ${order.slice(-2).map(k => `${k} ${pc(k, 0)}%`).join(", ")}는 낮습니다. 구축 안에서 한 세부가 30% 이상인 지역은 ${jo(notable.slice(0, 5).map(x => `${x[0]}의 ${esc(x[1])}(${x[2]}%)`).join(", "), "으로", "로")}, 지역마다 짓는 AI가 다릅니다.`;
-
-  // 방법과 한계: 흩어져 있던 "방법" 설명을 한곳에 모은다
-  const noise = C.find(c => c.name.startsWith("이름만"));
-  const M_ = [
-    ["데이터", `조달청 나라장터 발주계획현황서비스(용역, data.go.kr 15129462), 2024.01~2026.09, 중복 정리 후 ${fmt(total)}건. 공용 프록시(k-skill-proxy)로 조회했고 2026-10-29에 수집했습니다. 2026년은 9월까지입니다.`],
-    ["유형과 갈래", "사업명에서 연도·(긴급) 같은 꼬리표를 떼고 qwen/qwen3-embedding-8b로 임베딩(4,096차원)한 뒤 K-means로 10개 유형을 만들고 네 갈래로 묶었습니다(시드 42). 유형 이름은 군집 중심에 가까운 사업명을 읽고 붙였습니다."],
-    ["떠오르는 표현", "사업명의 이웃한 두 단어 조합과 단어의 등장 비율을 2024년과 2026년으로 비교한 로그 오즈비 순위입니다. 함께 쓰인 말은 그 단어가 든 사업명에 전체 평균보다 1.5배 이상 자주 나온 말입니다."],
-    ["구축 세부", "시스템 구축·운영 사업만 따로 K-means 10개로 나눴습니다. 비중은 그해 구축 사업 전체에서 그 세부가 차지하는 몫입니다."],
-    ["지역", `기관명에서 시·도를 뽑을 수 있는 ${fmt(V.region_coverage)}건(${pct(V.region_coverage, V.total)}%)만 썼고, 세부 비중 표는 구축 사업이 10건 이상인 지역만 넣었습니다. 지역별 건수가 작아 한두 사업에 비중이 크게 흔들립니다.`],
-    ["한계", `유형은 사업명만으로 나눈 것이라 경계가 흐릿합니다. 라벨은 칸막이가 아니라 경향이고, 확인은 원문 공고로 합니다.${noise ? ` ${fmt(noise.count)}건은 이름에만 AI가 들어간 사업으로, 키워드 수집으로는 걸러지지 않았습니다.` : ""}`],
-  ];
-  $("method").innerHTML = M_.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("");
 
   sizeMap();
   refresh();
